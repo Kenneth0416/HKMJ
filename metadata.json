@@ -1,0 +1,5 @@
+{
+  "name": "HKMJ Scorer (港麻記帳)",
+  "description": "A professional manual scoring calculator for Hong Kong Old Style Mahjong with support for chips, custom rules, and history tracking.",
+  "requestFramePermissions": []
+}
