@@ -86,9 +86,8 @@ export default function App() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNewGameModalOpen, setIsNewGameModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'SCORE' | 'HISTORY' | 'SETTINGS'>('SCORE');
-  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
-  
+  const [activeTab, setActiveTab] = useState<'SCORE' | 'RULES' | 'HISTORY' | 'SETTINGS'>('SCORE');
+
   // Delete Modal State
   const [roundToDelete, setRoundToDelete] = useState<string | null>(null);
 
@@ -376,11 +375,11 @@ export default function App() {
                label={t('tabScore')}
              />
              <NavItem
-               active={false} // Always opens modal or drawer, not a persistent tab in sidebar mode usually
-               onClick={() => setIsRulesModalOpen(true)}
+               active={activeTab === 'RULES'}
+               onClick={() => setActiveTab('RULES')}
                icon={BookOpen}
                label={t('tabRules')}
-               className="xl:hidden" // Hide on XL where right sidebar exists
+               className="xl:hidden"
              />
              <NavItem
                active={activeTab === 'HISTORY'}
@@ -388,9 +387,9 @@ export default function App() {
                icon={History}
                label={t('tabHistory')}
              />
-             
+
              <div className="flex-1 my-2 border-t border-indigo-800/30 mx-2"></div>
-             
+
              <NavItem
                active={activeTab === 'SETTINGS'}
                onClick={() => setActiveTab('SETTINGS')}
@@ -401,7 +400,7 @@ export default function App() {
                active={false}
                onClick={() => setView('HOME')}
                icon={LogOut}
-               label={t('cancel')} // Using 'Cancel' as exit text or icon
+               label={t('cancel')}
                className="mt-auto opacity-50 hover:opacity-100"
              />
           </nav>
@@ -593,6 +592,15 @@ export default function App() {
             </>
             )}
 
+            {/* TAB: RULES (Mobile & Tablet only - XL has sidebar) */}
+            {activeTab === 'RULES' && (
+            <div className="flex-1 overflow-y-auto scrollbar-hide p-4 md:p-8 pb-24 xl:hidden">
+                <div className="max-w-2xl mx-auto">
+                    <HKMJRules t={t} className="w-full" />
+                </div>
+            </div>
+            )}
+
             {/* TAB: SETTINGS (Editable) */}
             {activeTab === 'SETTINGS' && (
             <div className="flex-1 overflow-y-auto scrollbar-hide p-6 md:p-10 pb-32">
@@ -754,33 +762,32 @@ export default function App() {
 
         {/* Mobile Bottom Nav (Hidden on MD+) */}
         <nav className="md:hidden absolute bottom-0 w-full bg-white border-t border-slate-200 flex justify-around py-2 pb-5 z-20 text-xs font-medium text-slate-500">
-            <button 
+            <button
             onClick={() => setActiveTab('SCORE')}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${activeTab === 'SCORE' ? 'text-indigo-600 bg-indigo-50' : 'hover:bg-slate-50'}`}
             >
             <User size={22} strokeWidth={activeTab === 'SCORE' ? 2.5 : 2} /> <span className="text-[10px]">{t('tabScore')}</span>
             </button>
 
-            {/* Rules Button */}
-            <button 
-                onClick={() => setIsRulesModalOpen(true)}
-                className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-slate-50"
+            <button
+                onClick={() => setActiveTab('RULES')}
+                className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${activeTab === 'RULES' ? 'text-indigo-600 bg-indigo-50' : 'hover:bg-slate-50'}`}
             >
-                <BookOpen size={22} /> <span className="text-[10px]">{t('tabRules')}</span>
+                <BookOpen size={22} strokeWidth={activeTab === 'RULES' ? 2.5 : 2} /> <span className="text-[10px]">{t('tabRules')}</span>
             </button>
 
-            <button 
-            className="w-12" 
-            disabled 
-            /* Spacer for FAB */ 
+            <button
+            className="w-12"
+            disabled
+            /* Spacer for FAB */
             />
-            <button 
+            <button
             onClick={() => setActiveTab('HISTORY')}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${activeTab === 'HISTORY' ? 'text-indigo-600 bg-indigo-50' : 'hover:bg-slate-50'}`}
             >
             <History size={22} strokeWidth={activeTab === 'HISTORY' ? 2.5 : 2} /> <span className="text-[10px]">{t('tabHistory')}</span>
             </button>
-            <button 
+            <button
             onClick={() => setActiveTab('SETTINGS')}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${activeTab === 'SETTINGS' ? 'text-indigo-600 bg-indigo-50' : 'hover:bg-slate-50'}`}
             >
@@ -794,15 +801,6 @@ export default function App() {
       <aside className="hidden xl:flex w-96 bg-white border-l border-slate-200 shrink-0 flex-col z-10 shadow-xl">
            <HKMJRules t={t} className="h-full border-0 rounded-none shadow-none" />
       </aside>
-
-      {/* Rules Modal (Mobile & Tablet) */}
-      {isRulesModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm xl:hidden">
-             <div className="w-full max-w-md h-[80vh] flex flex-col animate-fade-in-up">
-                 <HKMJRules t={t} onClose={() => setIsRulesModalOpen(false)} className="w-full h-full" />
-             </div>
-        </div>
-      )}
 
       {/* Delete Confirmation Modal */}
       {roundToDelete && (

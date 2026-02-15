@@ -2,7 +2,7 @@
 <html lang="zh-HK">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="color-scheme" content="light" />
 
     <!-- Primary Meta Tags -->
@@ -39,8 +39,9 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- Theme Color -->
-    <meta name="theme-color" content="#065f46" />
-    <meta name="msapplication-TileColor" content="#065f46" />
+    <meta name="theme-color" content="#1e1b4b" />
+    <meta name="msapplication-TileColor" content="#1e1b4b" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -118,6 +119,15 @@
 <link rel="stylesheet" href="/index.css">
 </head>
   <body class="bg-gray-50 text-slate-900 antialiased select-none">
+    <style>
+      /* Safe area padding for notched devices */
+      html, body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+      }
+    </style>
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
