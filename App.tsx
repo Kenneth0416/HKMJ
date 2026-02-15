@@ -486,8 +486,8 @@ export default function App() {
                 <div className="flex-1 overflow-y-auto scrollbar-hide px-4 md:px-8 pb-24">
                     <div className="max-w-6xl mx-auto w-full h-full">
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[300px]">
-                            {/* Header of the 'Form' */}
-                            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            {/* Header of the 'Form' - Fixed */}
+                            <div className="shrink-0 p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                 <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
                                     <ScrollText size={16} className="text-indigo-500" />
                                     {t('recentHistory')}
@@ -497,8 +497,8 @@ export default function App() {
                                 </button>
                             </div>
 
-                            {/* List Content */}
-                            <div className="flex-1 p-2 space-y-1">
+                            {/* List Content - Scrollable */}
+                            <div className="flex-1 overflow-y-auto p-2 space-y-1">
                                 {session.rounds.length === 0 ? (
                                     <div className="h-full flex flex-col items-center justify-center text-slate-400 py-12">
                                         <History size={48} className="mb-4 opacity-20" />
@@ -528,10 +528,18 @@ export default function App() {
 
             {/* TAB: HISTORY (Full) */}
             {activeTab === 'HISTORY' && (
-            <div className="flex-1 overflow-y-auto scrollbar-hide p-4 md:p-8 pb-24">
-                <div className="max-w-4xl mx-auto">
-                    <h2 className="text-2xl font-bold text-slate-800 mb-6 hidden md:block">{t('tabHistory')}</h2>
-                    <div className="space-y-4">
+            <>
+                {/* Fixed Header */}
+                <div className="shrink-0 p-4 md:p-8 pb-0 md:pb-2 bg-slate-50 md:bg-white">
+                    <div className="max-w-4xl mx-auto">
+                        <h2 className="text-2xl font-bold text-slate-800 hidden md:block">{t('tabHistory')}</h2>
+                    </div>
+                </div>
+
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto scrollbar-hide px-4 md:px-8 pb-24">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="space-y-4 pt-2">
                         {session.rounds.map(round => (
                             <div key={round.id} className="group relative">
                             <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
@@ -582,6 +590,7 @@ export default function App() {
                     </div>
                 </div>
             </div>
+            </>
             )}
 
             {/* TAB: SETTINGS (Editable) */}
