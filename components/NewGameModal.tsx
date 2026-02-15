@@ -29,8 +29,8 @@ const NewGameModal: React.FC<NewGameModalProps> = ({ isOpen, onClose, onSubmit, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="bg-indigo-700 p-4 text-white flex items-center gap-2">
           <Users size={20} />
           <h2 className="text-lg font-bold">{t('newGameTitle')}</h2>

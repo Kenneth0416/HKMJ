@@ -10,6 +10,10 @@ import PresetSelector from './components/PresetSelector';
 import HKMJRules from './components/HKMJRules';
 import { MahjongLogo } from './components/Logo';
 import { History, Settings, User, Trash2, Coins, Save, RotateCw, Sigma, Edit2, Globe, BookOpen, Smartphone, Plus, LogOut, ScrollText, CheckCircle } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+
+// Check if running on native platform
+const isNative = Capacitor.isNativePlatform();
 
 // --- Toast Notification Component ---
 const Toast = ({ message, visible }: { message: string; visible: boolean }) => (
@@ -50,7 +54,46 @@ const NavItem = ({ active, onClick, icon: Icon, label, className = '' }: any) =>
 export default function App() {
   // --- State ---
   const [view, setView] = useState<'HOME' | 'GAME'>('HOME');
-  
+
+  // --- Native platform optimizations ---
+  useEffect(() => {
+    if (isNative) {
+      // Disable overscroll/bounce on native platforms
+      document.body.style.overscrollBehavior = 'none';
+      document.documentElement.style.overscrollBehavior = 'none';
+
+      // Prevent pull-to-refresh
+      let startY = 0;
+      const handleTouchStart = (e: TouchEvent) => {
+        startY = e.touches[0].pageY;
+      };
+      const handleTouchMove = (e: TouchEvent) => {
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const currentY = e.touches[0].pageY;
+        const isScrollingUp = currentY > startY;
+        const isScrollingDown = currentY < startY;
+
+        // Prevent overscroll at boundaries
+        if (scrollTop === 0 && isScrollingUp) {
+          e.preventDefault();
+        }
+        if (scrollTop + clientHeight >= scrollHeight && isScrollingDown) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener('touchstart', handleTouchStart, { passive: true });
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+      return () => {
+        document.removeEventListener('touchstart', handleTouchStart);
+        document.removeEventListener('touchmove', handleTouchMove);
+      };
+    }
+  }, []);
+
   // Language State
   const [lang, setLang] = useState<Language>(() => {
     return (localStorage.getItem('hkmj_lang') as Language) || 'zh-HK';
@@ -323,7 +366,7 @@ export default function App() {
 
   if (view === 'HOME') {
     return (
-      <>
+      <div className={`min-h-screen ${isNative ? 'overscroll-none' : ''}`}>
         <LandscapeBlocker />
         <LandingPage 
           hasActiveSession={session.rounds.length > 0 || Object.values(session.players).some(p => p.score !== 0)}
@@ -338,7 +381,7 @@ export default function App() {
           onSubmit={handleStartNewGame}
           t={t}
         />
-      </>
+      </div>
     );
   }
 
@@ -348,7 +391,7 @@ export default function App() {
   // Tablet/Desktop (>= md): Left Sidebar, Center Content, Right Rules (only on XL)
   
   return (
-    <div className="flex h-[100dvh] w-full bg-slate-100 overflow-hidden text-slate-900 font-sans">
+    <div className={`flex h-[100dvh] w-full bg-slate-100 overflow-hidden text-slate-900 font-sans ${isNative ? 'overscroll-none' : ''}`}>
 
       <LandscapeBlocker />
 
@@ -804,8 +847,8 @@ export default function App() {
 
       {/* Delete Confirmation Modal */}
       {roundToDelete && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 animate-scale-in">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setRoundToDelete(null)}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 animate-scale-in" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-slate-800 mb-2">{t('deleteRoundTitle')}</h3>
             <p className="text-slate-600 mb-4 text-sm">{t('deleteConfirmBody')}</p>
             

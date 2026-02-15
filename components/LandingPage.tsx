@@ -103,8 +103,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ hasActiveSession, onContinue,
 
       {/* Rules Modal (Mobile & Desktop triggered) */}
       {showRules && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-             <div className="w-full max-w-2xl h-[85vh] flex">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowRules(false)}>
+             <div className="w-full max-w-2xl h-[85vh] flex" onClick={e => e.stopPropagation()}>
                  <HKMJRules t={t} onClose={() => setShowRules(false)} className="w-full h-full" />
              </div>
         </div>

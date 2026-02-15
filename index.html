@@ -127,7 +127,25 @@
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
       }
+
+      /* Android native specific optimizations */
+      @supports (top: env(safe-area-inset-top)) {
+        /* Only apply on native platforms where safe-area-inset exists */
+        html, body {
+          overscroll-behavior: none;
+          -webkit-overflow-scrolling: touch;
+        }
+        body > div:first-child {
+          overscroll-behavior: none;
+        }
+      }
     </style>
+    <script>
+      // Disable pull-to-refresh and overscroll on native platforms
+      if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        document.body.style.overscrollBehavior = 'none';
+      }
+    </script>
     <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
