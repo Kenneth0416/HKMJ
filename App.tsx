@@ -16,14 +16,29 @@ import { Capacitor } from '@capacitor/core';
 const isNative = Capacitor.isNativePlatform();
 
 // --- Toast Notification Component ---
-const Toast = ({ message, visible }: { message: string; visible: boolean }) => (
-  <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
-    <div className="bg-emerald-600 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-2 font-medium">
-      <CheckCircle size={20} />
-      {message}
+import { Trash2, Edit3, Sparkles } from 'lucide-react';
+
+type ToastType = 'success' | 'delete' | 'edit' | 'info';
+
+const Toast = ({ message, visible, type = 'success' }: { message: string; visible: boolean; type?: ToastType }) => {
+  const styles: Record<ToastType, { bg: string; icon: React.ReactNode }> = {
+    success: { bg: 'bg-emerald-600', icon: <CheckCircle size={20} /> },
+    delete: { bg: 'bg-red-500', icon: <Trash2 size={20} /> },
+    edit: { bg: 'bg-indigo-600', icon: <Edit3 size={20} /> },
+    info: { bg: 'bg-slate-700', icon: <Sparkles size={20} /> },
+  };
+
+  const style = styles[type];
+
+  return (
+    <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+      <div className={`${style.bg} text-white px-5 py-3 rounded-full shadow-xl flex items-center gap-2 font-medium`}>
+        {style.icon}
+        {message}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // --- Mobile Landscape Blocker Component ---
 const LandscapeBlocker = () => (
@@ -144,9 +159,11 @@ export default function App() {
   // Toast State
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<ToastType>('success');
 
-  const showToastNotification = (message: string) => {
+  const showToastNotification = (message: string, type: ToastType = 'success') => {
     setToastMessage(message);
+    setToastType(type);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2500);
   };
@@ -234,9 +251,12 @@ export default function App() {
         dealerId: newDealerId
       };
     });
-    
+
     // Reset Edit State
     setEditingRound(null);
+
+    // Show success toast
+    showToastNotification(editingRound ? '紀錄已更新' : '紀錄已新增', editingRound ? 'edit' : 'success');
   };
 
   const confirmDeleteRound = () => {
@@ -260,8 +280,9 @@ export default function App() {
         rounds: prev.rounds.filter(r => r.id !== roundId)
       };
     });
-    
+
     setRoundToDelete(null);
+    showToastNotification('紀錄已刪除', 'delete');
   };
 
   const handleEditClick = (round: RoundResult) => {
@@ -396,7 +417,7 @@ export default function App() {
       <LandscapeBlocker />
 
       {/* Toast Notification */}
-      <Toast message={toastMessage} visible={showToast} />
+      <Toast message={toastMessage} visible={showToast} type={toastType} />
 
       {/* --- LEFT SIDEBAR (Tablet/Desktop) --- */}
       <aside className="hidden md:flex flex-col w-20 lg:w-64 bg-indigo-900 text-white shrink-0 transition-all duration-300 z-20">
