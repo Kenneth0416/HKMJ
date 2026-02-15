@@ -483,9 +483,9 @@ export default function App() {
                 </div>
 
                 {/* 2. SCROLLABLE BOTTOM: Recent History wrapped in a "Sheet/Form" */}
-                <div className="flex-1 overflow-y-auto scrollbar-hide px-4 md:px-8 pb-24">
-                    <div className="max-w-6xl mx-auto w-full h-full">
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[300px]">
+                <div className="flex-1 min-h-0 px-4 md:px-8 pb-24 flex flex-col">
+                    <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col min-h-0">
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-0 overflow-hidden">
                             {/* Header of the 'Form' - Fixed */}
                             <div className="shrink-0 p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                 <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
@@ -498,7 +498,7 @@ export default function App() {
                             </div>
 
                             {/* List Content - Scrollable */}
-                            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                            <div className="flex-1 min-h-0 overflow-y-auto p-2 space-y-1">
                                 {session.rounds.length === 0 ? (
                                     <div className="h-full flex flex-col items-center justify-center text-slate-400 py-12">
                                         <History size={48} className="mb-4 opacity-20" />
@@ -511,7 +511,7 @@ export default function App() {
                                 )}
                                 {session.rounds.length > 10 && (
                                     <div className="text-center py-4">
-                                        <button 
+                                        <button
                                             onClick={() => setActiveTab('HISTORY')}
                                             className="text-xs text-slate-400 hover:text-indigo-600 font-medium"
                                         >
