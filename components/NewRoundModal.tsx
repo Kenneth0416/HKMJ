@@ -149,9 +149,9 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto flex flex-col">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b">
+        <div className="flex justify-between items-center p-4 border-b shrink-0">
           <h2 className="text-xl font-bold text-slate-800">
             {initialData ? t('editRound') : t('newRound')}
           </h2>
@@ -161,7 +161,7 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b">
+        <div className="flex border-b shrink-0">
           <button
             onClick={() => setMode('CALCULATED')}
             className={`flex-1 py-3 font-medium flex items-center justify-center gap-2 ${mode === 'CALCULATED' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}
@@ -176,7 +176,7 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
           </button>
         </div>
 
-        <div className="p-6 space-y-6 flex-1">
+        <div className="p-6 space-y-6 flex-1 overflow-y-auto">
           
           {mode === 'CALCULATED' ? (
             <>
@@ -342,10 +342,11 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
           </div>
         </div>
 
-        <div className="p-4 border-t bg-slate-50">
+        {/* Fixed Bottom Button */}
+        <div className="p-4 border-t bg-white rounded-b-xl shrink-0">
           <button
             onClick={handleSubmit}
-            className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold text-lg shadow-lg hover:bg-indigo-700 active:scale-95 transition-all"
+            className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-indigo-700 active:scale-[0.98] transition-all"
           >
             {initialData ? t('update') : t('confirm')}
           </button>
