@@ -242,14 +242,14 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
                       </span>
                     </label>
                     <div className="flex items-center gap-4">
-                      <button onClick={() => setFaan(Math.max(0, faan - 1))} className="w-10 h-10 rounded-full border border-slate-300 flex items-center justify-center text-xl font-bold text-slate-600">-</button>
+                      <button onClick={() => setFaan(Math.max(0, faan - 1))} className="w-14 h-14 rounded-full border-2 border-slate-300 flex items-center justify-center text-2xl font-bold text-slate-600 hover:bg-slate-100 active:bg-slate-200 active:scale-95 transition-all">-</button>
                       <input
                         type="number"
                         value={faan}
                         onChange={(e) => setFaan(parseInt(e.target.value) || 0)}
-                        className="flex-1 bg-transparent text-slate-900 text-center text-2xl font-bold py-2 border-b-2 border-slate-200 focus:border-indigo-600 outline-none"
+                        className="flex-1 bg-transparent text-slate-900 text-center text-3xl font-bold py-2 border-b-2 border-slate-200 focus:border-indigo-600 outline-none"
                       />
-                      <button onClick={() => setFaan(Math.min(13, faan + 1))} className="w-10 h-10 rounded-full border border-slate-300 flex items-center justify-center text-xl font-bold text-slate-600">+</button>
+                      <button onClick={() => setFaan(Math.min(13, faan + 1))} className="w-14 h-14 rounded-full border-2 border-slate-300 flex items-center justify-center text-2xl font-bold text-slate-600 hover:bg-slate-100 active:bg-slate-200 active:scale-95 transition-all">+</button>
                     </div>
                     {faan < rules.minFaan && (
                       <p className="text-xs text-red-500 mt-1">{t('chickenHand', {n: rules.minFaan})}</p>
