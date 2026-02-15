@@ -723,14 +723,14 @@ export default function App() {
                     </div>
 
                     {/* Save Button - Fixed at bottom of settings */}
-                    <div className={`fixed bottom-16 md:bottom-0 left-0 md:left-20 lg:left-64 right-0 xl:right-96 p-4 bg-white/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-between transition-all duration-300 z-30 ${hasUnsavedSettings ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
+                    <div className={`fixed bottom-20 md:bottom-0 left-0 md:left-20 lg:left-64 right-0 xl:right-96 p-3 md:p-4 bg-white/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-between transition-all duration-300 z-[25] ${hasUnsavedSettings ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
                         <div className="flex items-center gap-2 text-amber-600">
                             <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
                             <span className="text-sm font-medium">有未儲存的變更</span>
                         </div>
                         <button
                         onClick={handleSaveSettings}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl shadow-lg flex items-center gap-2 font-bold active:scale-95 transition-all"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 md:px-6 md:py-2.5 rounded-xl shadow-lg flex items-center gap-2 font-bold active:scale-95 transition-all"
                         >
                         <Save size={18} /> {t('saveSettings')}
                         </button>
