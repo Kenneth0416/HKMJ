@@ -250,14 +250,15 @@ export default function App() {
     if (preset) {
         setEditingRules(prev => ({
             ...prev,
-            ...preset.rules
+            ...preset.rules,
+            presetId: presetIndex // Save the preset ID
         }));
         setHasUnsavedSettings(true);
     }
   };
 
   const updateRuleValue = <K extends keyof RuleConfig>(key: K, value: RuleConfig[K]) => {
-    setEditingRules(prev => ({ ...prev, [key]: value }));
+    setEditingRules(prev => ({ ...prev, [key]: value, presetId: undefined })); // Mark as custom when manually changing
     setHasUnsavedSettings(true);
   };
 
@@ -629,11 +630,12 @@ export default function App() {
                             {t('quickPreset')}
                         </h3>
                         
-                        <PresetSelector 
+                        <PresetSelector
                             presets={SCORING_PRESETS}
                             onSelect={applyPreset}
                             lang={lang}
                             t={t}
+                            currentPresetId={editingRules.presetId}
                         />
                     </div>
 

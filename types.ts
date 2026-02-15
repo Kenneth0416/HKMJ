@@ -28,6 +28,7 @@ export interface RuleConfig {
   dealerDouble: boolean; // Does dealer win/lose double?
   discarderPaysAll: boolean; // True: Shooter pays everything. False: Shooter pays base, others pay base.
   unitPrice: number; // The value of 1 Faan (Base chip value). Formula: unitPrice * 2^(faan-1)
+  presetId?: number; // Index of the selected preset, undefined means custom
 }
 
 export interface RoundResult {

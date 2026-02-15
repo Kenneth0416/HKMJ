@@ -5,9 +5,10 @@ export const WINDS_ORDER = [Wind.East, Wind.South, Wind.West, Wind.North];
 export const DEFAULT_RULES: RuleConfig = {
   minFaan: 0,
   maxFaan: 8,
-  dealerDouble: false, 
+  dealerDouble: false,
   discarderPaysAll: true, // Hidden from UI but defaults to true (Standard HKMJ)
-  unitPrice: 1, 
+  unitPrice: 1,
+  presetId: 0, // Default to "Standard ($1)"
 };
 
 export const SCORING_PRESETS = [
