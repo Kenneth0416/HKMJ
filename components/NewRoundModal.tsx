@@ -234,29 +234,50 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
                   )}
 
                   {/* Faan Input */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2 flex justify-between">
+                  <div className="bg-gradient-to-r from-slate-50 to-slate-100 p-4 rounded-xl border border-slate-200">
+                    <label className="block text-sm font-semibold text-slate-700 mb-3 flex justify-between items-center">
                       <span>{t('faanCount')}</span>
-                      <span className="text-indigo-600 font-bold">
-                        {calculateBaseValue(Math.min(faan, rules.maxFaan), rules.unitPrice)} $
+                      <span className="text-emerald-600 font-bold text-lg">
+                        ${calculateBaseValue(Math.min(faan, rules.maxFaan), rules.unitPrice)}
                       </span>
                     </label>
-                    <div className="flex items-center gap-4">
-                      <button onClick={() => setFaan(Math.max(0, faan - 1))} className="w-14 h-14 rounded-full border-2 border-slate-300 flex items-center justify-center text-2xl font-bold text-slate-600 hover:bg-slate-100 active:bg-slate-200 active:scale-95 transition-all">-</button>
-                      <input
-                        type="number"
-                        value={faan}
-                        onChange={(e) => setFaan(parseInt(e.target.value) || 0)}
-                        className="flex-1 bg-transparent text-slate-900 text-center text-3xl font-bold py-2 border-b-2 border-slate-200 focus:border-indigo-600 outline-none"
-                      />
-                      <button onClick={() => setFaan(Math.min(13, faan + 1))} className="w-14 h-14 rounded-full border-2 border-slate-300 flex items-center justify-center text-2xl font-bold text-slate-600 hover:bg-slate-100 active:bg-slate-200 active:scale-95 transition-all">+</button>
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={() => setFaan(Math.max(0, faan - 1))}
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-red-50 hover:bg-red-100 active:bg-red-200 border-2 border-red-200 flex items-center justify-center text-3xl sm:text-4xl font-bold text-red-500 active:scale-95 transition-all shadow-sm"
+                      >
+                        −
+                      </button>
+                      <div className="flex-1 max-w-[120px] sm:max-w-[160px]">
+                        <input
+                          type="number"
+                          value={faan}
+                          onChange={(e) => setFaan(parseInt(e.target.value) || 0)}
+                          className="w-full bg-white text-slate-900 text-center text-4xl sm:text-5xl font-bold py-3 rounded-2xl border-2 border-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none shadow-inner"
+                        />
+                      </div>
+                      <button
+                        onClick={() => setFaan(Math.min(13, faan + 1))}
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-green-50 hover:bg-green-100 active:bg-green-200 border-2 border-green-200 flex items-center justify-center text-3xl sm:text-4xl font-bold text-green-500 active:scale-95 transition-all shadow-sm"
+                      >
+                        +
+                      </button>
                     </div>
-                    {faan < rules.minFaan && (
-                      <p className="text-xs text-red-500 mt-1">{t('chickenHand', {n: rules.minFaan})}</p>
-                    )}
-                    {faan > rules.maxFaan && (
-                      <p className="text-xs text-orange-500 mt-1">{t('limitHand', {n: rules.maxFaan})}</p>
-                    )}
+                    <div className="mt-3 text-center">
+                      {faan < rules.minFaan ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
+                          {t('chickenHand', {n: rules.minFaan})}
+                        </span>
+                      ) : faan > rules.maxFaan ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full">
+                          {t('limitHand', {n: rules.maxFaan})}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400">
+                          {t('minFaan')}: {rules.minFaan} · {t('maxFaan')}: {rules.maxFaan}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Preview Calculation */}
