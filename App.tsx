@@ -9,7 +9,17 @@ import LandingPage from './components/LandingPage';
 import PresetSelector from './components/PresetSelector';
 import HKMJRules from './components/HKMJRules';
 import { MahjongLogo } from './components/Logo';
-import { History, Settings, User, Trash2, Coins, Save, RotateCw, Sigma, Edit2, Globe, BookOpen, Smartphone, Plus, LogOut, ScrollText } from 'lucide-react';
+import { History, Settings, User, Trash2, Coins, Save, RotateCw, Sigma, Edit2, Globe, BookOpen, Smartphone, Plus, LogOut, ScrollText, CheckCircle } from 'lucide-react';
+
+// --- Toast Notification Component ---
+const Toast = ({ message, visible }: { message: string; visible: boolean }) => (
+  <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+    <div className="bg-emerald-600 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-2 font-medium">
+      <CheckCircle size={20} />
+      {message}
+    </div>
+  </div>
+);
 
 // --- Mobile Landscape Blocker Component ---
 const LandscapeBlocker = () => (
@@ -88,6 +98,16 @@ export default function App() {
   // Settings Tab Local State
   const [editingRules, setEditingRules] = useState<RuleConfig>(session.rules);
   const [hasUnsavedSettings, setHasUnsavedSettings] = useState(false);
+
+  // Toast State
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToastNotification = (message: string) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2500);
+  };
 
   // Sync session rules to editing state when session changes (or tab opens)
   useEffect(() => {
@@ -215,7 +235,7 @@ export default function App() {
   const handleSaveSettings = () => {
     setSession(prev => ({ ...prev, rules: editingRules }));
     setHasUnsavedSettings(false);
-    alert(t('rulesUpdated'));
+    showToastNotification(t('rulesUpdated'));
   };
 
   const handleResetSettings = () => {
@@ -329,8 +349,11 @@ export default function App() {
   
   return (
     <div className="flex h-[100dvh] w-full bg-slate-100 overflow-hidden text-slate-900 font-sans">
-      
+
       <LandscapeBlocker />
+
+      {/* Toast Notification */}
+      <Toast message={toastMessage} visible={showToast} />
 
       {/* --- LEFT SIDEBAR (Tablet/Desktop) --- */}
       <aside className="hidden md:flex flex-col w-20 lg:w-64 bg-indigo-900 text-white shrink-0 transition-all duration-300 z-20">
@@ -699,13 +722,17 @@ export default function App() {
                         </div>
                     </div>
 
-                    {/* Save Button */}
-                    <div className={`fixed bottom-0 left-0 md:left-20 lg:left-64 xl:left-64 right-0 xl:right-96 p-4 md:p-6 bg-white/90 backdrop-blur-md border-t border-slate-200 flex justify-center transition-transform duration-300 z-30 ${hasUnsavedSettings ? 'translate-y-0' : 'translate-y-full'}`}>
-                        <button 
+                    {/* Save Button - Fixed at bottom of settings */}
+                    <div className={`fixed bottom-16 md:bottom-0 left-0 md:left-20 lg:left-64 right-0 xl:right-96 p-4 bg-white/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-between transition-all duration-300 z-30 ${hasUnsavedSettings ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
+                        <div className="flex items-center gap-2 text-amber-600">
+                            <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                            <span className="text-sm font-medium">有未儲存的變更</span>
+                        </div>
+                        <button
                         onClick={handleSaveSettings}
-                        className="bg-slate-800 hover:bg-slate-900 text-white px-8 py-3 rounded-full shadow-xl flex items-center gap-3 font-bold animate-bounce-slight transition-colors"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl shadow-lg flex items-center gap-2 font-bold active:scale-95 transition-all"
                         >
-                        <Save size={20} /> {t('saveSettings')}
+                        <Save size={18} /> {t('saveSettings')}
                         </button>
                     </div>
                 </div>
