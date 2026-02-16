@@ -228,8 +228,13 @@ export default function App() {
   // Sync session rules to editing state when session changes (or tab opens)
   useEffect(() => {
     setEditingRules(session.rules);
-    setHasUnsavedSettings(false);
   }, [session.rules]);
+
+  // Auto-detect if settings have changed
+  useEffect(() => {
+    const hasChanges = JSON.stringify(editingRules) !== JSON.stringify(session.rules);
+    setHasUnsavedSettings(hasChanges);
+  }, [editingRules, session.rules]);
 
   // Persist State
   useEffect(() => {
@@ -455,7 +460,6 @@ export default function App() {
   const handleResetSettings = () => {
     if(window.confirm(t('resetConfirm'))) {
         setEditingRules(DEFAULT_RULES);
-        setHasUnsavedSettings(true);
     }
   };
 
@@ -467,13 +471,11 @@ export default function App() {
             ...preset.rules,
             presetId: presetIndex // Save the preset ID
         }));
-        setHasUnsavedSettings(true);
     }
   };
 
   const updateRuleValue = <K extends keyof RuleConfig>(key: K, value: RuleConfig[K]) => {
     setEditingRules(prev => ({ ...prev, [key]: value, presetId: undefined })); // Mark as custom when manually changing
-    setHasUnsavedSettings(true);
   };
 
   // --- Render Helpers ---
@@ -901,7 +903,6 @@ export default function App() {
                             ...prev,
                             horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, enabled: !prev.horse?.enabled }
                           }));
-                          setHasUnsavedSettings(true);
                         }}
                       >
                         <div className="flex items-center gap-3 md:gap-4">
@@ -927,7 +928,6 @@ export default function App() {
                               ...prev,
                               horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, enabled: !prev.horse?.enabled }
                             }));
-                            setHasUnsavedSettings(true);
                           }}
                           color="amber"
                           size="lg"
@@ -949,7 +949,6 @@ export default function App() {
                                       ...prev,
                                       horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: val }
                                     }));
-                                    setHasUnsavedSettings(true);
                                   }}
                                   min={1}
                                   max={13}
@@ -966,7 +965,6 @@ export default function App() {
                                       ...prev,
                                       horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: val }
                                     }));
-                                    setHasUnsavedSettings(true);
                                   }}
                                   min={0.5}
                                   step={0.5}
@@ -989,7 +987,6 @@ export default function App() {
                                         ...prev,
                                         horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, payoutMode: mode }
                                       }));
-                                      setHasUnsavedSettings(true);
                                     }}
                                     className={`py-3.5 md:py-3 px-2 md:px-3 text-sm md:text-xs rounded-xl border-2 font-semibold transition-all duration-200 touch-manipulation ${
                                       editingRules.horse?.payoutMode === mode
@@ -1015,7 +1012,6 @@ export default function App() {
                                         ...prev,
                                         horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, liability }
                                       }));
-                                      setHasUnsavedSettings(true);
                                     }}
                                     className={`py-3.5 md:py-3 px-2 md:px-3 text-sm md:text-xs rounded-xl border-2 font-semibold transition-all duration-200 touch-manipulation ${
                                       editingRules.horse?.liability === liability
@@ -1042,7 +1038,6 @@ export default function App() {
                                     ...prev,
                                     horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, capApplies: !prev.horse?.capApplies }
                                   }));
-                                  setHasUnsavedSettings(true);
                                 }}
                                 color="amber"
                                 size="md"
@@ -1121,7 +1116,6 @@ export default function App() {
                                   ...prev,
                                   windFollowsDealer: !prev.windFollowsDealer
                                 }));
-                                setHasUnsavedSettings(true);
                               }}
                             >
                                 <div className="flex items-center gap-3">
@@ -1140,7 +1134,6 @@ export default function App() {
                                       ...prev,
                                       windFollowsDealer: !prev.windFollowsDealer
                                     }));
-                                    setHasUnsavedSettings(true);
                                   }}
                                   color="indigo"
                                   size="lg"
