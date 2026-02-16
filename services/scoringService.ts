@@ -92,32 +92,33 @@ export const calculateRoundDeltas = (
 
   // 3. Calculate horse bonus if enabled
   const horseConfig = rules.horse;
-  let horseBonusPerPlayer = 0;  // 每家額外付的馬獎
-  let hasHorseBonus = false;  // 是否有馬獎（包括加番模式的額外價值）
+  let horseBonusPerPlayer = 0;  // 每家額外付的馬獎（用於分攤和出衄者付）
+  let multipliedBase = 0;  // 倍數後的完整金額（用於三家付）
+  let useMultipliedBase = false;  // 是否使用倍數模式
+  let hasHorseBonus = false;
 
   if (horseConfig?.enabled && horseHits && horseHits > 0) {
     hasHorseBonus = true;
     switch (horseConfig.payoutMode) {
       case 'ADD_FAAN': {
         // 加番模式：馬直接加到番數上
-        // 計算原番數的價值和新番數的價值差額，這差額就是「馬獎」
         let newFaan = rawFaan + (horseHits * horseConfig.perHorseValue);
         if (horseConfig.capApplies) {
           newFaan = Math.min(newFaan, rules.maxFaan);
         }
         effectiveFaan = newFaan;
-        // 計算因加番而增加的價值（作為馬獎）
         const newBaseValue = calculateBaseValue(effectiveFaan, rules.unitPrice);
         horseBonusPerPlayer = newBaseValue - originalBaseValue;
         break;
       }
       case 'MULTIPLIER': {
         // 倍數模式：每中一馬增加 N 倍
-        // perHorseValue = 1，horseHits = 1 → base * (1 + 1) = 2倍
-        // perHorseValue = 1，horseHits = 2 → base * (1 + 2) = 3倍
-        // perHorseValue = 2，horseHits = 1 → base * (1 + 2) = 3倍
+        // 三家付時：每家付 base * multiplier（完整倍數）
+        // 分攤/出衄者付時：每家付 base + (base * (multiplier-1)) / 3
         const multiplier = 1 + (horseConfig.perHorseValue * horseHits);
-        horseBonusPerPlayer = originalBaseValue * (multiplier - 1);
+        multipliedBase = originalBaseValue * multiplier;
+        horseBonusPerPlayer = multipliedBase - originalBaseValue;  // 額外部分
+        useMultipliedBase = true;
         break;
       }
       case 'ADD_UNITS': {
@@ -145,6 +146,7 @@ export const calculateRoundDeltas = (
 
   const finalBaseValue = baseValue * dealerMultiplier;
   const finalHorseBonus = horseBonusPerPlayer * dealerMultiplier;
+  const finalMultipliedBase = multipliedBase * dealerMultiplier;
 
   // 6. Distribute based on win type and liability
   if (winType === WinType.SelfDraw) {
@@ -158,11 +160,17 @@ export const calculateRoundDeltas = (
         if (hasHorseBonus && horseConfig) {
           switch (horseConfig.liability) {
             case 'ALL_PAY':
-              // 三家付：每家固定付馬獎
-              playerPays -= finalHorseBonus;
+              // 三家付：每家付完整金額
+              if (useMultipliedBase) {
+                // 倍數模式：每家付 multipliedBase
+                playerPays = -finalMultipliedBase;
+              } else {
+                // 其他模式：base + 馬獎
+                playerPays -= finalHorseBonus;
+              }
               break;
             case 'SPLIT_PAY':
-              // 分攤：總額除3
+              // 分攤：馬獎總額除3
               playerPays -= finalHorseBonus / 3;
               break;
             case 'DISCARDER_PAYS':
@@ -186,17 +194,26 @@ export const calculateRoundDeltas = (
     if (hasHorseBonus && horseConfig) {
       switch (horseConfig.liability) {
         case 'ALL_PAY':
-          // 三家付：base 由出衄者付，馬獎由三家（不包括胡家）各付一份
-          // 出衄者：付 base + 馬獎
-          // 其他兩家：各付馬獎
-          deltas[loserId] = loserPays - finalHorseBonus;
-          ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
-            if (pid !== winnerId && pid !== loserId) {
-              deltas[pid] = -finalHorseBonus;
-            }
-          });
-          // 胡家收 base + 3 × 馬獎
-          deltas[winnerId] = finalBaseValue + finalHorseBonus * 3;
+          // 三家付：base 由出衄者付，馬獎由三家各付一份
+          if (useMultipliedBase) {
+            // 倍數模式：出衄者付 base，其他兩家各付 multipliedBase
+            deltas[loserId] = loserPays;
+            ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
+              if (pid !== winnerId && pid !== loserId) {
+                deltas[pid] = -finalMultipliedBase;
+              }
+            });
+            deltas[winnerId] = finalBaseValue + finalMultipliedBase * 2;
+          } else {
+            // 其他模式：出衄者付 base + 馬獎，其他兩家各付馬獎
+            deltas[loserId] = loserPays - finalHorseBonus;
+            ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
+              if (pid !== winnerId && pid !== loserId) {
+                deltas[pid] = -finalHorseBonus;
+              }
+            });
+            deltas[winnerId] = finalBaseValue + finalHorseBonus * 3;
+          }
           return deltas as Record<PlayerId, number>;
 
         case 'DISCARDER_PAYS':
@@ -207,7 +224,6 @@ export const calculateRoundDeltas = (
 
         case 'SPLIT_PAY':
           // 分攤：馬獎總額由三家平分，出衄者另付 base
-          // 每家（包括出衄者）付 馬獎/3，出衄者額外付 base
           const horseShare = finalHorseBonus / 3;
           ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
             if (pid !== winnerId) {
