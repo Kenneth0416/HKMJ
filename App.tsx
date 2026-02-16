@@ -1119,58 +1119,184 @@ export default function App() {
                     </div>
 
                     {/* Price Configuration */}
-                    <div className="space-y-6 mb-8">
+                    <div className="space-y-4 md:space-y-6 mb-6 md:mb-8">
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">{t('parameters')}</h3>
 
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div>
-                                    <label className="font-bold text-slate-700 block mb-1">{t('unitPrice')}</label>
-                                    <p className="text-xs text-slate-400 mb-2">{t('baseValue')}</p>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                                        <input 
-                                            type="number"
-                                            min="0.1"
-                                            step="0.1"
-                                            value={editingRules.unitPrice}
-                                            onChange={(e) => updateRuleValue('unitPrice', parseFloat(e.target.value) || 0)}
-                                            className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl px-4 pl-8 py-3 font-mono font-bold text-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div className="flex gap-4">
-                                    <div className="flex-1">
-                                        <span className="font-bold text-slate-700 block text-sm mb-2">{t('minFaan')}</span>
-                                        <input 
-                                            type="number" 
-                                            value={editingRules.minFaan}
-                                            onChange={(e) => updateRuleValue('minFaan', Math.max(0, parseInt(e.target.value) || 0))}
-                                            className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl p-3 text-center font-bold text-lg focus:border-indigo-500 outline-none"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <span className="font-bold text-slate-700 block text-sm mb-2">{t('maxFaan')}</span>
-                                        <input 
-                                            type="number" 
-                                            value={editingRules.maxFaan}
-                                            onChange={(e) => updateRuleValue('maxFaan', parseInt(e.target.value) || 0)}
-                                            className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl p-3 text-center font-bold text-lg focus:border-indigo-500 outline-none"
-                                        />
-                                    </div>
-                                </div>
+                        {/* Unit Price Card */}
+                        <div className="bg-white rounded-2xl md:rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:border-indigo-200 transition-colors">
+                          <div className="p-4 md:p-6">
+                            <label className="text-sm md:text-base font-bold text-slate-700 block mb-1">{t('unitPrice')}</label>
+                            <p className="text-xs text-slate-400 mb-3">{t('baseValue')}</p>
+                            <div className="flex items-center gap-2 md:gap-3">
+                              <button
+                                onClick={() => {
+                                  const newVal = Math.max(0.1, (editingRules.unitPrice || 10) - 1);
+                                  updateRuleValue('unitPrice', newVal);
+                                }}
+                                className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
+                              >−</button>
+                              <div className="flex-1 relative">
+                                <span className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">$</span>
+                                <input
+                                  type="number"
+                                  min="0.1"
+                                  step="0.1"
+                                  value={editingRules.unitPrice ?? ''}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === '') {
+                                      updateRuleValue('unitPrice', undefined as any);
+                                    } else {
+                                      const parsed = parseFloat(val);
+                                      if (!isNaN(parsed)) {
+                                        updateRuleValue('unitPrice', Math.max(0.1, parsed));
+                                      }
+                                    }
+                                  }}
+                                  onBlur={(e) => {
+                                    const val = e.target.value;
+                                    if (val === '' || parseFloat(val) < 0.1) {
+                                      updateRuleValue('unitPrice', 10);
+                                    }
+                                  }}
+                                  className="w-full h-12 md:h-11 bg-slate-50 text-slate-900 border-2 border-slate-200 rounded-xl px-4 pl-8 md:pl-9 font-mono font-bold text-xl md:text-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                                />
+                              </div>
+                              <button
+                                onClick={() => {
+                                  const newVal = (editingRules.unitPrice || 10) + 1;
+                                  updateRuleValue('unitPrice', newVal);
+                                }}
+                                className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
+                              >+</button>
                             </div>
+                          </div>
+                        </div>
+
+                        {/* Faan Range Card */}
+                        <div className="bg-white rounded-2xl md:rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:border-indigo-200 transition-colors">
+                          <div className="p-4 md:p-6">
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
+                                <span className="text-sm md:text-base font-bold text-slate-700 block">{lang === 'zh-HK' ? '番數範圍' : 'Faan Range'}</span>
+                                <span className="text-xs text-slate-400">{lang === 'zh-HK' ? '設定最小與最大番數' : 'Set min and max faan'}</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-xs text-slate-400">{editingRules.minFaan} - {editingRules.maxFaan} {lang === 'zh-HK' ? '番' : 'faan'}</span>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3 md:gap-4">
+                              <div>
+                                <label className="text-xs font-semibold text-slate-500 block mb-2">{t('minFaan')}</label>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => {
+                                      const newVal = Math.max(0, (editingRules.minFaan || 0) - 1);
+                                      updateRuleValue('minFaan', newVal);
+                                    }}
+                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
+                                  >−</button>
+                                  <input
+                                    type="number"
+                                    value={editingRules.minFaan ?? ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      if (val === '') {
+                                        updateRuleValue('minFaan', undefined as any);
+                                      } else {
+                                        const parsed = parseInt(val);
+                                        if (!isNaN(parsed)) {
+                                          updateRuleValue('minFaan', Math.max(0, parsed));
+                                        }
+                                      }
+                                    }}
+                                    onBlur={(e) => {
+                                      const val = e.target.value;
+                                      if (val === '' || parseInt(val) < 0) {
+                                        updateRuleValue('minFaan', 0);
+                                      }
+                                    }}
+                                    className="flex-1 h-12 md:h-11 bg-slate-50 text-slate-900 border-2 border-slate-200 rounded-xl text-center font-bold text-xl md:text-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      const newVal = Math.min(editingRules.maxFaan || 10, (editingRules.minFaan || 0) + 1);
+                                      updateRuleValue('minFaan', newVal);
+                                    }}
+                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
+                                  >+</button>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="text-xs font-semibold text-slate-500 block mb-2">{t('maxFaan')}</label>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => {
+                                      const newVal = Math.max(editingRules.minFaan || 0, (editingRules.maxFaan || 10) - 1);
+                                      updateRuleValue('maxFaan', newVal);
+                                    }}
+                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
+                                  >−</button>
+                                  <input
+                                    type="number"
+                                    value={editingRules.maxFaan ?? ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      if (val === '') {
+                                        updateRuleValue('maxFaan', undefined as any);
+                                      } else {
+                                        const parsed = parseInt(val);
+                                        if (!isNaN(parsed)) {
+                                          updateRuleValue('maxFaan', Math.max(0, parsed));
+                                        }
+                                      }
+                                    }}
+                                    onBlur={(e) => {
+                                      const val = e.target.value;
+                                      if (val === '' || parseInt(val) < editingRules.minFaan) {
+                                        updateRuleValue('maxFaan', editingRules.minFaan || 10);
+                                      }
+                                    }}
+                                    className="flex-1 h-12 md:h-11 bg-slate-50 text-slate-900 border-2 border-slate-200 rounded-xl text-center font-bold text-xl md:text-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      const newVal = (editingRules.maxFaan || 10) + 1;
+                                      updateRuleValue('maxFaan', newVal);
+                                    }}
+                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
+                                  >+</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
 
                         {/* Wind Follows Dealer Toggle */}
-                        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mt-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <span className="font-bold text-slate-700 block">{lang === 'zh-HK' ? '門風跟莊轉' : 'Wind Follows Dealer'}</span>
-                                    <span className="text-xs text-slate-400">{lang === 'zh-HK' ? '莊家永遠是東位' : 'Dealer is always East'}</span>
+                        <div className={`rounded-2xl md:rounded-3xl transition-all duration-300 ${editingRules.windFollowsDealer ? 'bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-300 shadow-lg shadow-indigo-100/50' : 'bg-white border border-slate-200 shadow-sm hover:border-indigo-200'}`}>
+                            <div className="p-4 md:p-5 flex items-center justify-between cursor-pointer active:bg-indigo-50/50 md:active:bg-transparent"
+                              onClick={() => {
+                                setEditingRules(prev => ({
+                                  ...prev,
+                                  windFollowsDealer: !prev.windFollowsDealer
+                                }));
+                                setHasUnsavedSettings(true);
+                              }}
+                            >
+                                <div className="flex items-center gap-3">
+                                  <div className={`p-2.5 md:p-3 rounded-xl md:rounded-2xl transition-all duration-300 ${editingRules.windFollowsDealer ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-300/50' : 'bg-slate-100 text-slate-400'}`}>
+                                    <RotateCw size={20} className="md:w-5 md:h-5" />
+                                  </div>
+                                  <div>
+                                    <span className={`font-bold text-sm md:text-base block transition-colors ${editingRules.windFollowsDealer ? 'text-indigo-900' : 'text-slate-700'}`}>{lang === 'zh-HK' ? '門風跟莊轉' : 'Wind Follows Dealer'}</span>
+                                    <span className={`text-xs transition-colors ${editingRules.windFollowsDealer ? 'text-indigo-600' : 'text-slate-400'}`}>{lang === 'zh-HK' ? '莊家永遠是東位' : 'Dealer is always East'}</span>
+                                  </div>
                                 </div>
-                                <button
+                                <div
+                                  className={`w-16 h-9 md:w-14 md:h-8 rounded-full transition-all duration-300 ${editingRules.windFollowsDealer ? 'bg-indigo-500 shadow-lg shadow-indigo-300/50' : 'bg-slate-200'}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <button
                                     onClick={() => {
                                       setEditingRules(prev => ({
                                         ...prev,
@@ -1178,28 +1304,29 @@ export default function App() {
                                       }));
                                       setHasUnsavedSettings(true);
                                     }}
-                                    className={`w-14 h-8 rounded-full transition-colors ${editingRules.windFollowsDealer ? 'bg-indigo-600' : 'bg-slate-200'}`}
-                                >
-                                    <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform ${editingRules.windFollowsDealer ? 'translate-x-7' : 'translate-x-1'}`} />
-                                </button>
+                                    className="w-full h-full"
+                                  >
+                                    <div className={`w-7 h-7 md:w-6 md:h-6 bg-white rounded-full shadow-lg transition-all duration-300 mt-1 ${editingRules.windFollowsDealer ? 'translate-x-8 md:translate-x-7' : 'translate-x-1'}`} />
+                                  </button>
+                                </div>
                             </div>
                         </div>
 
                         {/* Dynamic Preview Table */}
-                        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden mt-4 shadow-sm">
-                            <div className="grid grid-cols-3 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 py-3 px-6 uppercase tracking-wider">
+                        <div className="bg-white rounded-2xl md:rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                            <div className="grid grid-cols-3 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 py-3 md:py-4 px-4 md:px-6 uppercase tracking-wider">
                             <div>{t('faan')}</div>
                             <div className="col-span-2 text-right">{t('chips')}</div>
                             </div>
-                            <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                            <div className="max-h-52 md:max-h-60 overflow-y-auto custom-scrollbar">
                                 {[...Array(11)].map((_, i) => (
-                                <div key={i} className={`flex justify-between items-center px-6 py-3 border-b border-slate-50 last:border-0 ${i < editingRules.minFaan || i > editingRules.maxFaan ? 'opacity-30 bg-slate-50' : 'bg-white'}`}>
+                                <div key={i} className={`flex justify-between items-center px-4 md:px-6 py-3 border-b border-slate-50 last:border-0 ${i < editingRules.minFaan || i > editingRules.maxFaan ? 'opacity-30 bg-slate-50' : 'bg-white'}`}>
                                     <span className="font-mono text-sm text-slate-600 font-medium">
-                                        {i} {t('faanSuffix')} 
-                                        {i === editingRules.maxFaan && <span className="text-[10px] ml-1 text-red-500 bg-red-50 px-1 rounded border border-red-100">{t('cap')}</span>}
-                                        {i === editingRules.minFaan && <span className="text-[10px] ml-1 text-green-500 bg-green-50 px-1 rounded border border-green-100">{t('min')}</span>}
+                                        {i} {t('faanSuffix')}
+                                        {i === editingRules.maxFaan && <span className="text-[10px] ml-1 text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full border border-red-100">{t('cap')}</span>}
+                                        {i === editingRules.minFaan && <span className="text-[10px] ml-1 text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-100">{t('min')}</span>}
                                     </span>
-                                    <span className="font-mono font-bold text-slate-800">
+                                    <span className="font-mono font-bold text-slate-800 text-sm md:text-base">
                                         {calculateBaseValue(Math.min(Math.max(i, editingRules.minFaan), editingRules.maxFaan), editingRules.unitPrice)}
                                     </span>
                                 </div>
