@@ -87,26 +87,45 @@ export const calculateRoundDeltas = (
   if (effectiveFaan < rules.minFaan) return deltas as Record<PlayerId, number>;
   if (effectiveFaan > rules.maxFaan) effectiveFaan = rules.maxFaan;
 
-  // 2. Calculate horse bonus if enabled
+  // 2. Get original base value before horse adjustment
+  const originalBaseValue = calculateBaseValue(effectiveFaan, rules.unitPrice);
+
+  // 3. Calculate horse bonus if enabled
   const horseConfig = rules.horse;
-  let horseBonusTotal = 0;
+  let horseBonusPerPlayer = 0;  // 每家額外付的馬獎
 
   if (horseConfig?.enabled && horseHits && horseHits > 0) {
-    const horseResult = calculateHorseBonus(horseConfig, horseHits, rawFaan, rules);
-    // For ADD_FAAN mode, effectiveFaan is already adjusted
-    if (horseConfig.payoutMode === 'ADD_FAAN') {
-      effectiveFaan = horseResult.effectiveFaan;
-      if (horseConfig.capApplies) {
-        effectiveFaan = Math.min(effectiveFaan, rules.maxFaan);
+    switch (horseConfig.payoutMode) {
+      case 'ADD_FAAN': {
+        // 加番模式：馬直接加到番數上，不用額外計算馬獎
+        // 因為 effectiveFaan 會增加，baseValue 自然增加
+        let newFaan = rawFaan + (horseHits * horseConfig.perHorseValue);
+        if (horseConfig.capApplies) {
+          newFaan = Math.min(newFaan, rules.maxFaan);
+        }
+        effectiveFaan = newFaan;
+        // ADD_FAAN 模式下 horseBonusPerPlayer = 0，因為已經體現在番數增加上了
+        horseBonusPerPlayer = 0;
+        break;
+      }
+      case 'MULTIPLIER': {
+        // 倍數模式：baseValue 乘以倍數
+        const multiplier = horseConfig.perHorseValue * horseHits;
+        horseBonusPerPlayer = originalBaseValue * (multiplier - 1);
+        break;
+      }
+      case 'ADD_UNITS': {
+        // 加籌碼模式：每中一馬加 N 底
+        horseBonusPerPlayer = horseConfig.perHorseValue * horseHits * rules.unitPrice;
+        break;
       }
     }
-    horseBonusTotal = horseResult.horseBonusTotal;
   }
 
-  // 3. Get Base Value via Formula
+  // 4. Get final Base Value via Formula (with horse-adjusted faan for ADD_FAAN mode)
   const baseValue = calculateBaseValue(effectiveFaan, rules.unitPrice);
 
-  // 4. Dealer Multiplier Logic
+  // 5. Dealer Multiplier Logic
   let dealerMultiplier = 1;
   if (rules.dealerDouble) {
     const isWinnerDealer = winnerId === dealerId;
@@ -119,9 +138,9 @@ export const calculateRoundDeltas = (
   }
 
   const finalBaseValue = baseValue * dealerMultiplier;
-  const finalHorseBonus = horseBonusTotal * dealerMultiplier;
+  const finalHorseBonus = horseBonusPerPlayer * dealerMultiplier;
 
-  // 5. Distribute based on win type and liability
+  // 6. Distribute based on win type and liability
   if (winType === WinType.SelfDraw) {
     let totalWin = 0;
 
@@ -129,16 +148,13 @@ export const calculateRoundDeltas = (
       if (pid !== winnerId) {
         let playerPays = -finalBaseValue;
 
-        // Add horse bonus based on liability
-        if (horseBonusTotal > 0 && horseConfig) {
+        // Add horse bonus based on liability (for non-ADD_FAAN modes)
+        if (horseBonusPerPlayer > 0 && horseConfig && horseConfig.payoutMode !== 'ADD_FAAN') {
           switch (horseConfig.liability) {
             case 'ALL_PAY':
             case 'SPLIT_PAY':
-              // All three players split the horse bonus
-              playerPays -= finalHorseBonus / 3;
-              break;
             case 'DISCARDER_PAYS':
-              // For self-draw, no single discarder - all pay equally
+              // All three players split the horse bonus
               playerPays -= finalHorseBonus / 3;
               break;
           }
@@ -154,8 +170,8 @@ export const calculateRoundDeltas = (
     const loserPays = -finalBaseValue;
     let winnerGets = finalBaseValue;
 
-    // Add horse bonus based on liability
-    if (horseBonusTotal > 0 && horseConfig) {
+    // Add horse bonus based on liability (for non-ADD_FAAN modes)
+    if (horseBonusPerPlayer > 0 && horseConfig && horseConfig.payoutMode !== 'ADD_FAAN') {
       switch (horseConfig.liability) {
         case 'ALL_PAY':
           // All three non-winners split the horse bonus
@@ -169,7 +185,6 @@ export const calculateRoundDeltas = (
             }
           });
           winnerGets += finalHorseBonus;
-          // Calculate winner's total
           let totalFromLoser = -deltas[loserId];
           let totalFromOthers = 0;
           ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
@@ -210,7 +225,7 @@ export const calculateRoundDeltas = (
       }
     }
 
-    // No horse bonus or default case
+    // No horse bonus or ADD_FAAN mode (bonus already in baseValue)
     deltas[loserId] = loserPays;
     deltas[winnerId] = winnerGets;
   }
