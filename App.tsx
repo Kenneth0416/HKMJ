@@ -127,9 +127,12 @@ export default function App() {
   // Edit State
   const [editingRound, setEditingRound] = useState<RoundResult | null>(null);
 
+  // Settings Tab Local State
+  const [editingRules, setEditingRules] = useState<RuleConfig>(session.rules);
+  const [hasUnsavedSettings, setHasUnsavedSettings] = useState(false);
+
   // Seat Editor State
   const [editingSeats, setEditingSeats] = useState<PlayerId[]>([0, 1, 2, 3]);
-  const [hasUnsavedSettings, setHasUnsavedSettings] = useState(false);
 
   // Toast State
   const [showToast, setShowToast] = useState(false);
