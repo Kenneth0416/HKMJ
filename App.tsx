@@ -930,13 +930,36 @@ export default function App() {
                                     type="number"
                                     min="1"
                                     max="13"
-                                    value={editingRules.horse?.horseCount || 4}
+                                    value={editingRules.horse?.horseCount ?? ''}
                                     onChange={(e) => {
-                                      setEditingRules(prev => ({
-                                        ...prev,
-                                        horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: parseInt(e.target.value) || 4 }
-                                      }));
-                                      setHasUnsavedSettings(true);
+                                      const val = e.target.value;
+                                      // Allow empty input during typing
+                                      if (val === '') {
+                                        setEditingRules(prev => ({
+                                          ...prev,
+                                          horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: undefined as any }
+                                        }));
+                                      } else {
+                                        const parsed = parseInt(val);
+                                        if (!isNaN(parsed)) {
+                                          setEditingRules(prev => ({
+                                            ...prev,
+                                            horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: Math.min(13, Math.max(1, parsed)) }
+                                          }));
+                                          setHasUnsavedSettings(true);
+                                        }
+                                      }
+                                    }}
+                                    onBlur={(e) => {
+                                      // Restore default on blur if empty or invalid
+                                      const val = e.target.value;
+                                      if (val === '' || parseInt(val) < 1) {
+                                        setEditingRules(prev => ({
+                                          ...prev,
+                                          horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: 4 }
+                                        }));
+                                        setHasUnsavedSettings(true);
+                                      }
                                     }}
                                     className="flex-1 h-12 md:h-11 bg-white text-amber-900 border-2 border-amber-200 rounded-xl text-center font-bold text-xl md:text-lg focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none"
                                   />
@@ -971,13 +994,36 @@ export default function App() {
                                     type="number"
                                     min="0.5"
                                     step="0.5"
-                                    value={editingRules.horse?.perHorseValue || 1}
+                                    value={editingRules.horse?.perHorseValue ?? ''}
                                     onChange={(e) => {
-                                      setEditingRules(prev => ({
-                                        ...prev,
-                                        horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: parseFloat(e.target.value) || 1 }
-                                      }));
-                                      setHasUnsavedSettings(true);
+                                      const val = e.target.value;
+                                      // Allow empty input during typing
+                                      if (val === '') {
+                                        setEditingRules(prev => ({
+                                          ...prev,
+                                          horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: undefined as any }
+                                        }));
+                                      } else {
+                                        const parsed = parseFloat(val);
+                                        if (!isNaN(parsed)) {
+                                          setEditingRules(prev => ({
+                                            ...prev,
+                                            horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: Math.max(0.5, parsed) }
+                                          }));
+                                          setHasUnsavedSettings(true);
+                                        }
+                                      }
+                                    }}
+                                    onBlur={(e) => {
+                                      // Restore default on blur if empty or invalid
+                                      const val = e.target.value;
+                                      if (val === '' || parseFloat(val) < 0.5) {
+                                        setEditingRules(prev => ({
+                                          ...prev,
+                                          horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: 1 }
+                                        }));
+                                        setHasUnsavedSettings(true);
+                                      }
                                     }}
                                     className="flex-1 h-12 md:h-11 bg-white text-amber-900 border-2 border-amber-200 rounded-xl text-center font-bold text-xl md:text-lg focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none"
                                   />
