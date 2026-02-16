@@ -1,6 +1,17 @@
-import { RuleConfig, Wind } from './types';
+import { RuleConfig, Wind, RoundWind } from './types';
 
 export const WINDS_ORDER = [Wind.East, Wind.South, Wind.West, Wind.North];
+
+// Round wind order for game progression
+export const ROUND_WINDS_ORDER: RoundWind[] = ['EAST', 'SOUTH', 'WEST', 'NORTH'];
+
+// Round wind display names
+export const ROUND_WIND_NAMES: Record<RoundWind, Record<string, string>> = {
+  EAST: { 'zh-HK': '東圈', 'en': 'East Round' },
+  SOUTH: { 'zh-HK': '南圈', 'en': 'South Round' },
+  WEST: { 'zh-HK': '西圈', 'en': 'West Round' },
+  NORTH: { 'zh-HK': '北圈', 'en': 'North Round' },
+};
 
 export const DEFAULT_RULES: RuleConfig = {
   minFaan: 0,

@@ -35,20 +35,26 @@ export interface RoundResult {
   id: string;
   timestamp: number;
   type: 'CALCULATED' | 'MANUAL'; // Mode A or Mode B
-  
+
   // For Display/History
   winnerId: PlayerId | null; // Null if Draw
   loserId: PlayerId | null; // Null if Self-Draw or Draw
-  faan?: number; 
-  
+  faan?: number;
+
   // The crucial accounting part
   deltas: Record<PlayerId, number>; // Must sum to 0
   note?: string;
 }
 
+// Round wind (圈風) - represents which round of the game
+export type RoundWind = 'EAST' | 'SOUTH' | 'WEST' | 'NORTH';
+
 export interface GameSession {
   players: Record<PlayerId, Player>;
   rounds: RoundResult[];
-  dealerId: PlayerId; // Who is currently East
+  dealerId: PlayerId; // Who is currently East (dealer)
   rules: RuleConfig;
+  // New fields for round tracking
+  roundWind: RoundWind; // Current round wind (東圈/南圈/西圈/北圈)
+  dealerCount: number; // How many times current dealer has been dealer (for continuous East)
 }

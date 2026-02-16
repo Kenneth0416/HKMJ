@@ -11,8 +11,8 @@ if (!rootElement) {
 
 // Initialize StatusBar on native platforms
 if (Capacitor.isNativePlatform()) {
-  StatusBar.setStyle({ style: Style.Dark }).catch(() => {});
-  StatusBar.setBackgroundColor({ color: '#1e1b4b' }).catch(() => {}); // indigo-900
+  // Hide the status bar completely
+  StatusBar.hide().catch(() => {});
 }
 
 const root = ReactDOM.createRoot(rootElement);

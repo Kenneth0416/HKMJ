@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GameSession, PlayerId, Player, RoundResult, Wind, RuleConfig, WinType } from './types';
-import { DEFAULT_RULES, MOCK_PLAYERS, SCORING_PRESETS } from './constants';
+import { DEFAULT_RULES, MOCK_PLAYERS, SCORING_PRESETS, ROUND_WINDS_ORDER, ROUND_WIND_NAMES } from './constants';
 import { calculateBaseValue } from './services/scoringService';
 import { getTranslation, Language, translations } from './translations';
 import NewRoundModal from './components/NewRoundModal';
@@ -73,39 +73,8 @@ export default function App() {
   // --- Native platform optimizations ---
   useEffect(() => {
     if (isNative) {
-      // Disable overscroll/bounce on native platforms
+      // Disable overscroll/bounce behavior only
       document.body.style.overscrollBehavior = 'none';
-      document.documentElement.style.overscrollBehavior = 'none';
-
-      // Prevent pull-to-refresh
-      let startY = 0;
-      const handleTouchStart = (e: TouchEvent) => {
-        startY = e.touches[0].pageY;
-      };
-      const handleTouchMove = (e: TouchEvent) => {
-        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-        const scrollHeight = document.documentElement.scrollHeight;
-        const clientHeight = document.documentElement.clientHeight;
-        const currentY = e.touches[0].pageY;
-        const isScrollingUp = currentY > startY;
-        const isScrollingDown = currentY < startY;
-
-        // Prevent overscroll at boundaries
-        if (scrollTop === 0 && isScrollingUp) {
-          e.preventDefault();
-        }
-        if (scrollTop + clientHeight >= scrollHeight && isScrollingDown) {
-          e.preventDefault();
-        }
-      };
-
-      document.addEventListener('touchstart', handleTouchStart, { passive: true });
-      document.addEventListener('touchmove', handleTouchMove, { passive: false });
-
-      return () => {
-        document.removeEventListener('touchstart', handleTouchStart);
-        document.removeEventListener('touchmove', handleTouchMove);
-      };
     }
   }, []);
 
@@ -132,13 +101,18 @@ export default function App() {
       if (parsed.rules && 'baseValueMap' in parsed.rules) {
         parsed.rules = DEFAULT_RULES; // Reset rules for migration safety
       }
+      // Migration: add roundWind and dealerCount if missing
+      if (!parsed.roundWind) parsed.roundWind = 'EAST';
+      if (parsed.dealerCount === undefined) parsed.dealerCount = 0;
       return parsed;
     }
     return {
       players: MOCK_PLAYERS.reduce((acc, p) => ({ ...acc, [p.id]: p }), {} as Record<PlayerId, Player>),
       rounds: [],
       dealerId: 0 as PlayerId,
-      rules: DEFAULT_RULES
+      rules: DEFAULT_RULES,
+      roundWind: 'EAST' as const,
+      dealerCount: 0
     };
   });
 
@@ -193,7 +167,9 @@ export default function App() {
         players: newPlayers,
         rounds: [],
         dealerId: 0, // Reset to East
-        rules: DEFAULT_RULES
+        rules: DEFAULT_RULES,
+        roundWind: 'EAST',
+        dealerCount: 0
     });
     setView('GAME');
     setIsNewGameModalOpen(false);
@@ -204,6 +180,8 @@ export default function App() {
       const newPlayers = { ...prev.players };
       let updatedRounds = [...prev.rounds];
       let newDealerId = prev.dealerId;
+      let newRoundWind = prev.roundWind;
+      let newDealerCount = prev.dealerCount;
 
       // 1. If Editing, first revert the effects of the old round
       if (editingRound) {
@@ -237,18 +215,47 @@ export default function App() {
          updatedRounds = [roundObj, ...updatedRounds]; // Add new to top
       }
 
-      // 5. Update Dealer Logic
-      if (!editingRound && roundObj.type === 'CALCULATED' && roundObj.winnerId !== null) {
-          if (roundObj.winnerId !== prev.dealerId) {
-             newDealerId = ((prev.dealerId + 1) % 4) as PlayerId;
-          }
+      // 5. Update Dealer Logic (HKMJ rules)
+      // - If dealer wins (self-draw or discard), dealer continues (dealerCount++)
+      // - If non-dealer wins, dealer passes to next player
+      // - If draw (流局), dealer continues (dealerCount++)
+      // - After 4 non-dealer wins (dealer passes 4 times), advance to next round wind
+      if (!editingRound && roundObj.type === 'CALCULATED') {
+        if (roundObj.winnerId === null) {
+          // Draw (流局) - dealer continues
+          newDealerCount++;
+        } else if (roundObj.winnerId === prev.dealerId) {
+          // Dealer wins - dealer continues
+          newDealerCount++;
+        } else {
+          // Non-dealer wins - pass dealer
+          newDealerId = ((prev.dealerId + 1) % 4) as PlayerId;
+          newDealerCount = 0; // Reset count for new dealer
+
+          // Check if we've completed a full round (4 passes)
+          // Advance round wind after completing one full cycle
+          const currentWindIndex = ROUND_WINDS_ORDER.indexOf(prev.roundWind);
+          const nextWindIndex = (currentWindIndex + 1) % 4;
+          newRoundWind = ROUND_WINDS_ORDER[nextWindIndex];
+        }
       }
+
+      // Update player winds based on new dealer
+      const winds = [Wind.East, Wind.South, Wind.West, Wind.North];
+      Object.keys(newPlayers).forEach(pid => {
+        const playerId = parseInt(pid) as PlayerId;
+        // Calculate relative position from dealer
+        const relativePos = (playerId - newDealerId + 4) % 4;
+        newPlayers[playerId].wind = winds[relativePos];
+      });
 
       return {
         ...prev,
         players: newPlayers,
         rounds: updatedRounds,
-        dealerId: newDealerId
+        dealerId: newDealerId,
+        roundWind: newRoundWind,
+        dealerCount: newDealerCount
       };
     });
 
@@ -387,7 +394,7 @@ export default function App() {
 
   if (view === 'HOME') {
     return (
-      <div className={`min-h-screen ${isNative ? 'overscroll-none' : ''}`}>
+      <div className="min-h-screen">
         <LandscapeBlocker />
         <LandingPage 
           hasActiveSession={session.rounds.length > 0 || Object.values(session.players).some(p => p.score !== 0)}
@@ -412,7 +419,7 @@ export default function App() {
   // Tablet/Desktop (>= md): Left Sidebar, Center Content, Right Rules (only on XL)
   
   return (
-    <div className={`flex h-[100dvh] w-full bg-slate-100 overflow-hidden text-slate-900 font-sans ${isNative ? 'overscroll-none' : ''}`}>
+    <div className="flex h-[100dvh] w-full bg-slate-100 overflow-hidden text-slate-900 font-sans">
 
       <LandscapeBlocker />
 
@@ -520,24 +527,36 @@ export default function App() {
                 {/* 1. FIXED TOP: Player Scores */}
                 <div className="shrink-0 p-4 md:p-8 pb-4 md:pb-6 bg-slate-50/80 backdrop-blur-sm z-10">
                     <div className="max-w-6xl mx-auto w-full">
+                        {/* Round Wind Indicator */}
+                        <div className="flex items-center justify-center gap-2 mb-4">
+                            <span className="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                {ROUND_WIND_NAMES[session.roundWind][lang]}
+                            </span>
+                            <span className="text-slate-400 text-sm">
+                                {lang === 'zh-HK' ? `第 ${session.dealerCount + 1} 巡` : `Hand ${session.dealerCount + 1}`}
+                            </span>
+                        </div>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                             {(Object.values(session.players) as Player[]).map(p => {
                                 const scoreColor = p.score > 0 ? 'text-green-600' : p.score < 0 ? 'text-red-600' : 'text-slate-600';
+                                const isDealer = p.id === session.dealerId;
                                 return (
-                                <div key={p.id} className="bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden group hover:border-indigo-300 transition-colors">
+                                <div key={p.id} className={`bg-white p-3 md:p-5 rounded-xl md:rounded-2xl shadow-sm border relative overflow-hidden group transition-colors ${isDealer ? 'border-indigo-400 ring-2 ring-indigo-100' : 'border-slate-200 hover:border-indigo-300'}`}>
                                     <div className="flex flex-row lg:flex-col items-center lg:items-start gap-2 mb-1 md:mb-2">
-                                    <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 text-xs md:text-sm border border-slate-200">
-                                        {p.name.charAt(0)}
+                                    <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-xs md:text-sm border ${isDealer ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                                        {p.wind}
                                     </div>
                                     <span className="font-bold text-slate-800 truncate text-sm md:text-base">{p.name}</span>
                                     </div>
                                     <div className={`text-2xl md:text-3xl font-mono font-bold tracking-tight ${scoreColor}`}>
                                     {p.score > 0 ? '+' : ''}{p.score}
                                     </div>
-                                    {/* Decorative Wind */}
-                                    <div className="absolute top-1 right-2 opacity-10 text-2xl font-serif select-none pointer-events-none text-slate-900">
-                                        {p.wind}
-                                    </div>
+                                    {/* Dealer Indicator */}
+                                    {isDealer && (
+                                        <div className="absolute top-2 right-2 bg-indigo-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">
+                                            莊
+                                        </div>
+                                    )}
                                 </div>
                                 )
                             })}
