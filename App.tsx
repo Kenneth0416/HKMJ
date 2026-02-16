@@ -232,22 +232,18 @@ export default function App() {
           newDealerId = ((prev.dealerId + 1) % 4) as PlayerId;
           newDealerCount = 0; // Reset count for new dealer
 
-          // Check if we've completed a full round (4 passes)
-          // Advance round wind after completing one full cycle
-          const currentWindIndex = ROUND_WINDS_ORDER.indexOf(prev.roundWind);
-          const nextWindIndex = (currentWindIndex + 1) % 4;
-          newRoundWind = ROUND_WINDS_ORDER[nextWindIndex];
+          // Check if we've completed a full round (dealer returned to original player)
+          // This happens when dealerId returns to 0 (original East)
+          if (newDealerId === 0) {
+            const currentWindIndex = ROUND_WINDS_ORDER.indexOf(prev.roundWind);
+            const nextWindIndex = (currentWindIndex + 1) % 4;
+            newRoundWind = ROUND_WINDS_ORDER[nextWindIndex];
+          }
         }
       }
 
-      // Update player winds based on new dealer
-      const winds = [Wind.East, Wind.South, Wind.West, Wind.North];
-      Object.keys(newPlayers).forEach(pid => {
-        const playerId = parseInt(pid) as PlayerId;
-        // Calculate relative position from dealer
-        const relativePos = (playerId - newDealerId + 4) % 4;
-        newPlayers[playerId].wind = winds[relativePos];
-      });
+      // Note: Player winds (門風) stay fixed based on initial seating
+      // Only dealerId changes to track who is currently the dealer
 
       return {
         ...prev,

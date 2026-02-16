@@ -13,7 +13,7 @@ export interface Player {
   id: PlayerId;
   name: string;
   score: number; // Current chips balance
-  wind: Wind; // Current seat wind
+  wind: Wind; // Seat wind (門風) - fixed based on initial seating position
 }
 
 export enum WinType {
