@@ -2,6 +2,16 @@
 
 export type PlayerId = 0 | 1 | 2 | 3;
 
+// Horse (跑馬仔) Configuration
+export interface HorseConfig {
+  enabled: boolean;           // 是否啟用跑馬仔
+  horseCount: number;         // 馬匹數量 (預設 4)
+  payoutMode: 'ADD_FAAN' | 'MULTIPLIER' | 'ADD_UNITS';  // 計算模式
+  perHorseValue: number;      // 每馬價值 (ADD_FAAN 時 = +N 番)
+  liability: 'ALL_PAY' | 'DISCARDER_PAYS' | 'SPLIT_PAY'; // 責任分派
+  capApplies: boolean;        // 是否受封頂限制
+}
+
 export enum Wind {
   East = "東",
   South = "南",
@@ -29,6 +39,7 @@ export interface RuleConfig {
   discarderPaysAll: boolean; // True: Shooter pays everything. False: Shooter pays base, others pay base.
   unitPrice: number; // The value of 1 Faan (Base chip value). Formula: unitPrice * 2^(faan-1)
   presetId?: number; // Index of the selected preset, undefined means custom
+  horse?: HorseConfig; // 跑馬仔設定 (選填，向後相容)
 }
 
 export interface RoundResult {
@@ -44,6 +55,9 @@ export interface RoundResult {
   // The crucial accounting part
   deltas: Record<PlayerId, number>; // Must sum to 0
   note?: string;
+
+  // Horse (跑馬仔) fields
+  horseHits?: number;           // 本鋪中馬數
 }
 
 // Round wind (圈風) - represents which round of the game

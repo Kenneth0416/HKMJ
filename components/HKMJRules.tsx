@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scroll, Info, BookOpen } from 'lucide-react';
+import { Scroll, Info, BookOpen, Sigma } from 'lucide-react';
 import MahjongTile, { TileType, TileValue } from './MahjongTile';
 
 interface HKMJRulesProps {
@@ -9,7 +9,7 @@ interface HKMJRulesProps {
 }
 
 const HKMJRules: React.FC<HKMJRulesProps> = ({ t, onClose, className = '' }) => {
-  
+
   // Helper to render a group of tiles
   const TileGroup = ({ tiles }: { tiles: { type: TileType, value: TileValue }[] }) => (
     <div className="flex gap-1">
@@ -34,7 +34,18 @@ const HKMJRules: React.FC<HKMJRulesProps> = ({ t, onClose, className = '' }) => 
       </div>
 
       <div className="p-5 overflow-y-auto custom-scrollbar space-y-8">
-        
+
+        {/* Scoring Formula */}
+        <div className="flex items-start gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <div className="text-indigo-600 mt-0.5 bg-white p-2 rounded-lg shadow-sm">
+            <Sigma size={20} />
+          </div>
+          <div className="flex-1">
+            <div className="text-xs text-slate-400 font-mono mb-1 uppercase">{t('scoringFormula')}</div>
+            <div className="font-bold text-slate-800 text-base md:text-lg">{t('formulaText')}</div>
+          </div>
+        </div>
+
         {/* Intro */}
         <div>
             <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-2">

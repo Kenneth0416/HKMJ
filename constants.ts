@@ -1,4 +1,4 @@
-import { RuleConfig, Wind, RoundWind } from './types';
+import { RuleConfig, Wind, RoundWind, HorseConfig } from './types';
 
 export const WINDS_ORDER = [Wind.East, Wind.South, Wind.West, Wind.North];
 
@@ -13,6 +13,16 @@ export const ROUND_WIND_NAMES: Record<RoundWind, Record<string, string>> = {
   NORTH: { 'zh-HK': '北圈', 'en': 'North Round' },
 };
 
+// Default Horse (跑馬仔) Configuration
+export const DEFAULT_HORSE_CONFIG: HorseConfig = {
+  enabled: false,
+  horseCount: 4,
+  payoutMode: 'ADD_FAAN',
+  perHorseValue: 1,
+  liability: 'DISCARDER_PAYS',
+  capApplies: true
+};
+
 export const DEFAULT_RULES: RuleConfig = {
   minFaan: 0,
   maxFaan: 8,
@@ -20,6 +30,7 @@ export const DEFAULT_RULES: RuleConfig = {
   discarderPaysAll: true, // Hidden from UI but defaults to true (Standard HKMJ)
   unitPrice: 1,
   presetId: 0, // Default to "Standard ($1)"
+  horse: DEFAULT_HORSE_CONFIG
 };
 
 export const SCORING_PRESETS = [

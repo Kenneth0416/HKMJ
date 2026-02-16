@@ -9,7 +9,7 @@ import LandingPage from './components/LandingPage';
 import PresetSelector from './components/PresetSelector';
 import HKMJRules from './components/HKMJRules';
 import { MahjongLogo } from './components/Logo';
-import { History, Settings, User, Trash2, Coins, Save, RotateCw, Sigma, Edit2, Globe, BookOpen, Smartphone, Plus, LogOut, ScrollText, CheckCircle, Users } from 'lucide-react';
+import { History, Settings, User, Trash2, Coins, Save, RotateCw, Edit2, Globe, BookOpen, Smartphone, Plus, LogOut, ScrollText, CheckCircle, Users } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 // Check if running on native platform
@@ -135,6 +135,8 @@ export default function App() {
   const [editingSeats, setEditingSeats] = useState<PlayerId[]>([0, 1, 2, 3]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [dragOffsetY, setDragOffsetY] = useState<number>(0);
 
   // Toast State
   const [showToast, setShowToast] = useState(false);
@@ -797,23 +799,11 @@ export default function App() {
                         />
                     </div>
 
-                    {/* Formula & Price Configuration */}
+                    {/* Price Configuration */}
                     <div className="space-y-6 mb-8">
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">{t('parameters')}</h3>
-                        
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <div className="flex items-start gap-4 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                <div className="text-indigo-600 mt-0.5 bg-white p-2 rounded-lg shadow-sm">
-                                    <Sigma size={20} />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="text-xs text-slate-400 font-mono mb-1 uppercase">{t('scoringFormula')}</div>
-                                    <div className="font-bold text-slate-800 text-base md:text-lg">
-                                        {t('formulaText')}
-                                    </div>
-                                </div>
-                            </div>
 
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div>
                                     <label className="font-bold text-slate-700 block mb-1">{t('unitPrice')}</label>
