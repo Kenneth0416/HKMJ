@@ -152,9 +152,15 @@ export const calculateRoundDeltas = (
         if (horseBonusPerPlayer > 0 && horseConfig && horseConfig.payoutMode !== 'ADD_FAAN') {
           switch (horseConfig.liability) {
             case 'ALL_PAY':
+              // 三家付：每家固定付 horseBonusPerPlayer（不是除3）
+              playerPays -= finalHorseBonus;
+              break;
             case 'SPLIT_PAY':
+              // 分攤：總額除3
+              playerPays -= finalHorseBonus / 3;
+              break;
             case 'DISCARDER_PAYS':
-              // All three players split the horse bonus
+              // 自摸時等同分攤
               playerPays -= finalHorseBonus / 3;
               break;
           }
@@ -174,35 +180,28 @@ export const calculateRoundDeltas = (
     if (horseBonusPerPlayer > 0 && horseConfig && horseConfig.payoutMode !== 'ADD_FAAN') {
       switch (horseConfig.liability) {
         case 'ALL_PAY':
-          // All three non-winners split the horse bonus
+          // 三家付：每家固定付 horseBonusPerPlayer
           ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
             if (pid !== winnerId) {
               if (pid === loserId) {
-                deltas[pid] = loserPays - finalHorseBonus / 3;
+                deltas[pid] = loserPays - finalHorseBonus;
               } else {
-                deltas[pid] = -finalHorseBonus / 3;
+                deltas[pid] = -finalHorseBonus;
               }
             }
           });
-          winnerGets += finalHorseBonus;
-          let totalFromLoser = -deltas[loserId];
-          let totalFromOthers = 0;
-          ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
-            if (pid !== winnerId && pid !== loserId) {
-              totalFromOthers += -deltas[pid];
-            }
-          });
-          deltas[winnerId] = totalFromLoser + totalFromOthers;
+          winnerGets += finalHorseBonus * 3;
+          deltas[winnerId] = winnerGets;
           return deltas as Record<PlayerId, number>;
 
         case 'DISCARDER_PAYS':
-          // Discarder pays everything including horse bonus
-          deltas[loserId] = loserPays - finalHorseBonus;
+          // 出銃者付：出銃者包晒
+          deltas[loserId] = loserPays - finalHorseBonus * 3;
           deltas[winnerId] = -deltas[loserId];
           return deltas as Record<PlayerId, number>;
 
         case 'SPLIT_PAY':
-          // Horse bonus split among all non-winners
+          // 分攤：總額除3
           ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
             if (pid !== winnerId) {
               if (pid === loserId) {
