@@ -52,8 +52,8 @@ const calculateRoundDeltas = (
           newFaan = Math.min(newFaan, rules.maxFaan);
         }
         effectiveFaan = newFaan;
-        const newBaseValue = calculateBaseValue(effectiveFaan, rules.unitPrice);
-        horseBonusPerPlayer = newBaseValue - originalBaseValue;
+        // 馬獎已體現在 effectiveFaan 增加中，不需要額外計算
+        horseBonusPerPlayer = 0;
         break;
       }
       case 'MULTIPLIER': {

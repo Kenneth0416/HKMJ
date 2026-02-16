@@ -294,33 +294,15 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
                           {t('horseHits')}
                         </span>
                         {horseHits > 0 && (() => {
-                          // 計算馬獎顯示
-                          const originalBase = calculateBaseValue(faan, rules.unitPrice);
-                          let horseBonusDisplay = 0;
-
-                          switch (rules.horse!.payoutMode) {
-                            case 'ADD_FAAN': {
-                              // 加番模式：顯示籌碼差額
-                              let newFaan = faan + (horseHits * rules.horse!.perHorseValue);
-                              if (rules.horse!.capApplies) {
-                                newFaan = Math.min(newFaan, rules.maxFaan);
-                              }
-                              const newBase = calculateBaseValue(newFaan, rules.unitPrice);
-                              horseBonusDisplay = (newBase - originalBase) * 3; // 3 家份
-                              break;
-                            }
-                            case 'MULTIPLIER': {
-                              // 倍數模式：每中一馬增加 N 倍
-                              const multiplier = 1 + (rules.horse!.perHorseValue * horseHits);
-                              horseBonusDisplay = originalBase * (multiplier - 1) * 3;
-                              break;
-                            }
-                            case 'ADD_UNITS': {
-                              // 加籌碼模式
-                              horseBonusDisplay = rules.horse!.perHorseValue * horseHits * rules.unitPrice * 3;
-                              break;
-                            }
-                          }
+                          // 使用統一的馬獎計算函數
+                          const { horseBonusTotal } = calculateHorseBonus(
+                            rules.horse!,
+                            horseHits,
+                            faan,
+                            rules
+                          );
+                          // 顯示三家份的馬獎總額
+                          const horseBonusDisplay = horseBonusTotal * 3;
                           return (
                             <span className="text-amber-600 font-bold text-sm">
                               +${horseBonusDisplay} {t('horseBonus')}

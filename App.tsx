@@ -231,22 +231,29 @@ export default function App() {
       // 5. Update Dealer Logic (HKMJ rules)
       // - If dealer wins (self-draw or discard), dealer continues (dealerCount++)
       // - If non-dealer wins, dealer passes to next player
-      // - If draw (流局), dealer continues (dealerCount++)
-      // - After 4 non-dealer wins (dealer passes 4 times), advance to next round wind
+      // - If draw (流局), dealer passes to next player (過莊)
+      // - After dealer passes 4 times (back to original East), advance to next round wind
       if (!editingRound && roundObj.type === 'CALCULATED') {
         if (roundObj.winnerId === null) {
-          // Draw (流局) - dealer continues
-          newDealerCount++;
+          // Draw (流局) - pass dealer (過莊)
+          newDealerId = ((prev.dealerId + 1) % 4) as PlayerId;
+          newDealerCount = 0;
+
+          // Check if we've completed a full round
+          if (newDealerId === 0) {
+            const currentWindIndex = ROUND_WINDS_ORDER.indexOf(prev.roundWind);
+            const nextWindIndex = (currentWindIndex + 1) % 4;
+            newRoundWind = ROUND_WINDS_ORDER[nextWindIndex];
+          }
         } else if (roundObj.winnerId === prev.dealerId) {
           // Dealer wins - dealer continues
           newDealerCount++;
         } else {
           // Non-dealer wins - pass dealer
           newDealerId = ((prev.dealerId + 1) % 4) as PlayerId;
-          newDealerCount = 0; // Reset count for new dealer
+          newDealerCount = 0;
 
-          // Check if we've completed a full round (dealer returned to original player)
-          // This happens when dealerId returns to 0 (original East)
+          // Check if we've completed a full round
           if (newDealerId === 0) {
             const currentWindIndex = ROUND_WINDS_ORDER.indexOf(prev.roundWind);
             const nextWindIndex = (currentWindIndex + 1) % 4;

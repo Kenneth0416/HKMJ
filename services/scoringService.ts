@@ -45,14 +45,14 @@ export const calculateHorseBonus = (
       horseBonusTotal = newBaseValue - originalBaseValue;
       break;
 
-    case 'MULTIPLIER':
+    case 'MULTIPLIER': {
       // 每中一馬乘 N 倍
-      if (horseConfig.capApplies && rawFaan > rules.maxFaan) {
-        effectiveFaan = rules.maxFaan;
-      }
-      const cappedBaseValue = calculateBaseValue(effectiveFaan, rules.unitPrice);
-      horseBonusTotal = cappedBaseValue * (horseConfig.perHorseValue * horseHits) - cappedBaseValue;
+      // multiplier = 1 + (perHorseValue * horseHits), 例如 2 馬 = 3 倍
+      // horseBonusTotal = base * (multiplier - 1)
+      const multiplier = 1 + (horseConfig.perHorseValue * horseHits);
+      horseBonusTotal = originalBaseValue * (multiplier - 1);
       break;
+    }
 
     case 'ADD_UNITS':
       // 每中一馬加 N 底 (unitPrice)
