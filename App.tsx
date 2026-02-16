@@ -230,9 +230,17 @@ export default function App() {
     setEditingRules(session.rules);
   }, [session.rules]);
 
-  // Auto-detect if settings have changed
+  // Auto-detect if settings have changed (compare only core rule values, not presetId)
   useEffect(() => {
-    const hasChanges = JSON.stringify(editingRules) !== JSON.stringify(session.rules);
+    const coreKeys = ['unitPrice', 'minFaan', 'maxFaan', 'discarderPaysAll', 'windFollowsDealer', 'horse'] as const;
+    const getCoreRules = (rules: RuleConfig) => {
+      const core: Record<string, unknown> = {};
+      coreKeys.forEach(key => {
+        core[key] = rules[key];
+      });
+      return JSON.stringify(core);
+    };
+    const hasChanges = getCoreRules(editingRules) !== getCoreRules(session.rules);
     setHasUnsavedSettings(hasChanges);
   }, [editingRules, session.rules]);
 
@@ -475,7 +483,25 @@ export default function App() {
   };
 
   const updateRuleValue = <K extends keyof RuleConfig>(key: K, value: RuleConfig[K]) => {
-    setEditingRules(prev => ({ ...prev, [key]: value, presetId: undefined })); // Mark as custom when manually changing
+    setEditingRules(prev => {
+      const newRules = { ...prev, [key]: value };
+
+      // Check if new rules match any preset
+      const matchingPresetIndex = SCORING_PRESETS.findIndex(preset => {
+        const presetRules = preset.rules;
+        return (
+          newRules.unitPrice === presetRules.unitPrice &&
+          newRules.minFaan === presetRules.minFaan &&
+          newRules.maxFaan === presetRules.maxFaan &&
+          newRules.discarderPaysAll === presetRules.discarderPaysAll
+        );
+      });
+
+      return {
+        ...newRules,
+        presetId: matchingPresetIndex >= 0 ? matchingPresetIndex : undefined
+      };
+    });
   };
 
   // --- Render Helpers ---
