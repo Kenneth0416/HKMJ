@@ -262,8 +262,16 @@ export default function App() {
         }
       }
 
-      // Note: Player winds (門風) stay fixed based on initial seating
-      // Only dealerId changes to track who is currently the dealer
+      // Note: Player winds (門風) - configurable via windFollowsDealer
+      // When enabled, dealer is always East, others follow in order
+      if (prev.rules.windFollowsDealer && newDealerId !== prev.dealerId) {
+        const winds = [Wind.East, Wind.South, Wind.West, Wind.North];
+        Object.keys(newPlayers).forEach(pid => {
+          const playerId = parseInt(pid) as PlayerId;
+          const relativePos = (playerId - newDealerId + 4) % 4;
+          newPlayers[playerId].wind = winds[relativePos];
+        });
+      }
 
       return {
         ...prev,
@@ -1008,6 +1016,28 @@ export default function App() {
                                         />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Wind Follows Dealer Toggle */}
+                        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mt-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <span className="font-bold text-slate-700 block">{lang === 'zh-HK' ? '門風跟莊轉' : 'Wind Follows Dealer'}</span>
+                                    <span className="text-xs text-slate-400">{lang === 'zh-HK' ? '莊家永遠是東位' : 'Dealer is always East'}</span>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                      setEditingRules(prev => ({
+                                        ...prev,
+                                        windFollowsDealer: !prev.windFollowsDealer
+                                      }));
+                                      setHasUnsavedSettings(true);
+                                    }}
+                                    className={`w-14 h-8 rounded-full transition-colors ${editingRules.windFollowsDealer ? 'bg-indigo-600' : 'bg-slate-200'}`}
+                                >
+                                    <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform ${editingRules.windFollowsDealer ? 'translate-x-7' : 'translate-x-1'}`} />
+                                </button>
                             </div>
                         </div>
 

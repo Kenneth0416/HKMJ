@@ -40,6 +40,7 @@ export interface RuleConfig {
   unitPrice: number; // The value of 1 Faan (Base chip value). Formula: unitPrice * 2^(faan-1)
   presetId?: number; // Index of the selected preset, undefined means custom
   horse?: HorseConfig; // 跑馬仔設定 (選填，向後相容)
+  windFollowsDealer?: boolean; // 門風是否跟隨莊家轉 (false = 固定門風, true = 莊家永遠是東)
 }
 
 export interface RoundResult {

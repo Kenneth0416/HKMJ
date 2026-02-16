@@ -30,7 +30,8 @@ export const DEFAULT_RULES: RuleConfig = {
   discarderPaysAll: true, // Hidden from UI but defaults to true (Standard HKMJ)
   unitPrice: 1,
   presetId: 0, // Default to "Standard ($1)"
-  horse: DEFAULT_HORSE_CONFIG
+  horse: DEFAULT_HORSE_CONFIG,
+  windFollowsDealer: false // 預設門風固定，不跟隨莊家
 };
 
 export const SCORING_PRESETS = [
