@@ -91,7 +91,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({ presets, onSelect, lang
   };
 
   return (
-    <div className="relative bg-white border border-indigo-200 rounded-xl shadow-sm overflow-hidden transition-all group hover:border-indigo-300">
+    <div className="relative z-20">
       {/* Backdrop to close on click outside */}
       {shouldRender && (
         <div
@@ -103,7 +103,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({ presets, onSelect, lang
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full p-3 flex items-center justify-between transition-all ${isOpen ? 'bg-indigo-50 border-b border-indigo-100' : ''}`}
+        className={`w-full bg-white border rounded-xl p-3 flex items-center justify-between transition-all shadow-sm group ${isOpen ? 'border-indigo-500 ring-2 ring-indigo-100 rounded-b-none' : 'border-indigo-200 hover:border-indigo-300'}`}
       >
         <div className="flex items-center gap-3 overflow-hidden">
           <div className={`p-2 rounded-lg shrink-0 transition-colors duration-200 ${isCustom ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>
@@ -133,16 +133,16 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({ presets, onSelect, lang
         />
       </button>
 
-      {/* Dropdown Menu - Accordion style */}
+      {/* Dropdown Menu - Overlay style */}
       {shouldRender && (
         <div
-          className={`z-20 max-h-64 overflow-y-auto border-t border-indigo-100 ${isOpen ? 'preset-accordion-open' : 'preset-accordion-close'}`}
+          className={`absolute top-full left-0 w-full bg-white border border-indigo-500 border-t-0 rounded-b-xl shadow-lg z-20 max-h-64 overflow-y-auto ${isOpen ? 'preset-accordion-open' : 'preset-accordion-close'}`}
         >
           {presets.map((preset, index) => (
             <button
               key={index}
               onClick={() => handleSelect(index)}
-              className={`w-full text-left p-3 hover:bg-indigo-50 transition-colors flex items-center justify-between group border-b border-slate-100 last:border-b-0 ${isOpen ? 'preset-item-animate' : ''}`}
+              className={`w-full text-left p-3 hover:bg-indigo-50 transition-colors flex items-center justify-between group border-b border-slate-100 last:border-b-0 last:rounded-b-xl ${isOpen ? 'preset-item-animate' : ''}`}
               style={isOpen ? { animationDelay: `${index * 30}ms` } : undefined}
             >
               <div className="flex-1">
