@@ -1148,45 +1148,42 @@ export default function App() {
                 {lang === 'zh-HK' ? '長按並拖拽卡片調整座位' : 'Long press and drag to reorder'}
               </p>
 
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 {editingSeats.map((playerId, index) => {
                   const player = session.players[playerId];
                   const winds = [Wind.East, Wind.South, Wind.West, Wind.North];
                   const isDealer = playerId === session.dealerId;
                   const isDragging = draggedIndex === index;
-                  const isDragOver = dragOverIndex === index;
+                  const isDragTarget = dragOverIndex === index && draggedIndex !== null && draggedIndex !== index;
 
                   const handleTouchStart = (e: React.TouchEvent) => {
                     const touch = e.touches[0];
-                    const element = e.currentTarget;
-                    element.setAttribute('data-start-y', String(touch.clientY));
-                    element.setAttribute('data-index', String(index));
+                    setTouchStartY(touch.clientY);
                   };
 
                   const handleTouchMove = (e: React.TouchEvent) => {
                     const touch = e.touches[0];
-                    const element = e.currentTarget;
-                    const startY = parseFloat(element.getAttribute('data-start-y') || '0');
-                    const currentIndex = parseInt(element.getAttribute('data-index') || '0');
+                    if (touchStartY === null) return;
 
-                    const deltaY = touch.clientY - startY;
+                    const deltaY = touch.clientY - touchStartY;
 
-                    // Start dragging if moved enough
-                    if (Math.abs(deltaY) > 10 && draggedIndex === null) {
-                      setDraggedIndex(currentIndex);
+                    if (Math.abs(deltaY) > 5 && draggedIndex === null) {
+                      setDraggedIndex(index);
                     }
 
                     if (draggedIndex !== null) {
-                      // Find element under touch point
+                      setDragOffsetY(deltaY);
                       const elements = document.querySelectorAll('[data-seat-card]');
+                      let foundIndex: number | null = null;
                       elements.forEach((el, i) => {
                         const rect = el.getBoundingClientRect();
                         if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-                          if (i !== draggedIndex && i !== dragOverIndex) {
-                            setDragOverIndex(i);
-                          }
+                          foundIndex = i;
                         }
                       });
+                      if (foundIndex !== null && foundIndex !== dragOverIndex) {
+                        setDragOverIndex(foundIndex);
+                      }
                     }
                   };
 
@@ -1200,7 +1197,16 @@ export default function App() {
                     }
                     setDraggedIndex(null);
                     setDragOverIndex(null);
+                    setTouchStartY(null);
+                    setDragOffsetY(0);
                   };
+
+                  let translateY = 0;
+                  if (isDragging) {
+                    translateY = dragOffsetY;
+                  } else if (isDragTarget && draggedIndex !== null) {
+                    translateY = (index < draggedIndex ? 1 : -1) * 56;
+                  }
 
                   return (
                     <div
@@ -1218,7 +1224,9 @@ export default function App() {
                       onDragOver={(e) => {
                         e.preventDefault();
                         e.dataTransfer.dropEffect = 'move';
-                        setDragOverIndex(index);
+                        if (dragOverIndex !== index) {
+                          setDragOverIndex(index);
+                        }
                       }}
                       onDragLeave={() => {
                         setDragOverIndex(null);
@@ -1238,27 +1246,33 @@ export default function App() {
                       onTouchStart={handleTouchStart}
                       onTouchMove={handleTouchMove}
                       onTouchEnd={handleTouchEnd}
-                      className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all touch-none select-none ${
-                        isDragging ? 'opacity-50 scale-95 border-indigo-400 bg-indigo-50' :
-                        isDragOver ? 'border-indigo-500 bg-indigo-100 scale-[1.02]' :
-                        'border-slate-200 bg-white active:bg-slate-50'
+                      style={{
+                        transform: `translateY(${translateY}px) scale(${isDragging ? 1.03 : 1})`,
+                        zIndex: isDragging ? 50 : 1,
+                        opacity: isDragging ? 0.95 : 1,
+                        boxShadow: isDragging ? '0 12px 40px rgba(99,102,241,0.3)' : undefined,
+                        transition: isDragging
+                          ? 'box-shadow 0.15s, opacity 0.15s'
+                          : 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s',
+                      }}
+                      className={`flex items-center gap-3 p-3 rounded-xl border-2 touch-none select-none ${
+                        isDragging ? 'border-indigo-500 bg-white' :
+                        isDragTarget ? 'border-indigo-400 bg-indigo-50' :
+                        'border-slate-200 bg-white hover:border-indigo-200 active:scale-[0.98]'
                       } ${isDealer ? 'ring-2 ring-indigo-200' : ''}`}
                     >
-                      {/* Wind Position */}
-                      <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200 shrink-0">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold border shrink-0 transition-colors ${
+                        isDragging ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                      }`}>
                         {winds[index]}
                       </div>
-
-                      {/* Player Name */}
                       <div className="flex-1 min-w-0">
-                        <span className="font-bold text-slate-800 truncate block">{player.name}</span>
-                        {isDealer && (
-                          <span className="text-xs text-indigo-600">莊家</span>
-                        )}
+                        <span className={`font-bold truncate block transition-colors ${isDragging ? 'text-indigo-700' : 'text-slate-800'}`}>
+                          {player.name}
+                        </span>
+                        {isDealer && <span className="text-xs text-indigo-600">莊家</span>}
                       </div>
-
-                      {/* Drag Handle */}
-                      <div className="text-slate-300 flex flex-col gap-0.5 shrink-0">
+                      <div className={`flex flex-col gap-0.5 shrink-0 transition-colors ${isDragging ? 'text-indigo-400' : 'text-slate-300'}`}>
                         <div className="w-4 h-0.5 bg-current rounded" />
                         <div className="w-4 h-0.5 bg-current rounded" />
                         <div className="w-4 h-0.5 bg-current rounded" />
