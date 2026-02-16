@@ -310,9 +310,8 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
                               break;
                             }
                             case 'MULTIPLIER': {
-                              // 倍數模式：每中一馬翻 N 倍
-                              // 例如 perHorseValue = 2，horseHits = 1，則 base * 2
-                              const multiplier = Math.pow(rules.horse!.perHorseValue, horseHits);
+                              // 倍數模式：每中一馬增加 N 倍
+                              const multiplier = 1 + (rules.horse!.perHorseValue * horseHits);
                               horseBonusDisplay = originalBase * (multiplier - 1) * 3;
                               break;
                             }
