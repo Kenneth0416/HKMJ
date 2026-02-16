@@ -68,7 +68,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ enabled, onChange, color = 
   const { outer, inner, translate } = sizeClasses[size];
 
   return (
-    <div className={`${outer} rounded-full transition-all duration-300 ${colorClasses[color]}`}>
+    <div className={`${outer} rounded-full transition-all duration-300 ${colorClasses[color]}`} onClick={(e) => e.stopPropagation()}>
       <button onClick={onChange} className="w-full h-full">
         <div className={`${inner} bg-white rounded-full shadow-lg transition-all duration-300 mt-1 ${enabled ? translate : 'translate-x-1'}`} />
       </button>
