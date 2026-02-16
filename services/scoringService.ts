@@ -174,34 +174,30 @@ export const calculateRoundDeltas = (
 
   } else if (winType === WinType.Discard && loserId !== null) {
     const loserPays = -finalBaseValue;
-    let winnerGets = finalBaseValue;
 
     // Add horse bonus based on liability (for non-ADD_FAAN modes)
     if (horseBonusPerPlayer > 0 && horseConfig && horseConfig.payoutMode !== 'ADD_FAAN') {
       switch (horseConfig.liability) {
         case 'ALL_PAY':
-          // 三家付：每家固定付 horseBonusPerPlayer
+          // 三家付：三家各付完整一份（baseValue + 馬獎）
           ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
             if (pid !== winnerId) {
-              if (pid === loserId) {
-                deltas[pid] = loserPays - finalHorseBonus;
-              } else {
-                deltas[pid] = -finalHorseBonus;
-              }
+              // 每家都付 baseValue + 馬獎
+              deltas[pid] = -(finalBaseValue + finalHorseBonus);
             }
           });
-          winnerGets += finalHorseBonus * 3;
-          deltas[winnerId] = winnerGets;
+          // 胡家收 3 × (baseValue + 馬獎)
+          deltas[winnerId] = (finalBaseValue + finalHorseBonus) * 3;
           return deltas as Record<PlayerId, number>;
 
         case 'DISCARDER_PAYS':
-          // 出銃者付：出銃者包晒
+          // 出銃者付：出銃者包晒（baseValue + 3 × 馬獎）
           deltas[loserId] = loserPays - finalHorseBonus * 3;
           deltas[winnerId] = -deltas[loserId];
           return deltas as Record<PlayerId, number>;
 
         case 'SPLIT_PAY':
-          // 分攤：總額除3
+          // 分攤：馬獎總額除3，出銃者付 baseValue
           ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
             if (pid !== winnerId) {
               if (pid === loserId) {
@@ -211,22 +207,14 @@ export const calculateRoundDeltas = (
               }
             }
           });
-          winnerGets += finalHorseBonus;
-          let totalFromLoser2 = -deltas[loserId];
-          let totalFromOthers2 = 0;
-          ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
-            if (pid !== winnerId && pid !== loserId) {
-              totalFromOthers2 += -deltas[pid];
-            }
-          });
-          deltas[winnerId] = totalFromLoser2 + totalFromOthers2;
+          deltas[winnerId] = finalBaseValue + finalHorseBonus;
           return deltas as Record<PlayerId, number>;
       }
     }
 
     // No horse bonus or ADD_FAAN mode (bonus already in baseValue)
     deltas[loserId] = loserPays;
-    deltas[winnerId] = winnerGets;
+    deltas[winnerId] = finalBaseValue;
   }
 
   return deltas as Record<PlayerId, number>;
