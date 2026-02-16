@@ -154,13 +154,13 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg h-[85vh] md:h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b shrink-0">
           <h2 className="text-xl font-bold text-slate-800">
             {initialData ? t('editRound') : t('newRound')}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full">
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -169,20 +169,20 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
         <div className="flex border-b shrink-0">
           <button
             onClick={() => setMode('CALCULATED')}
-            className={`flex-1 py-3 font-medium flex items-center justify-center gap-2 ${mode === 'CALCULATED' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}
+            className={`flex-1 py-3 font-medium flex items-center justify-center gap-2 transition-colors ${mode === 'CALCULATED' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <Calculator size={18} /> {t('calcMode')}
           </button>
           <button
             onClick={() => setMode('MANUAL')}
-            className={`flex-1 py-3 font-medium flex items-center justify-center gap-2 ${mode === 'MANUAL' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}
+            className={`flex-1 py-3 font-medium flex items-center justify-center gap-2 transition-colors ${mode === 'MANUAL' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
           >
             <Edit3 size={18} /> {t('manualMode')}
           </button>
         </div>
 
-        <div className="p-6 space-y-6 flex-1 overflow-y-auto">
-          
+        <div className="p-6 space-y-6 flex-1 overflow-y-auto min-h-0">
+
           {mode === 'CALCULATED' ? (
             <>
               {/* Type Selection */}

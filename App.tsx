@@ -45,6 +45,37 @@ const animationStyles = `
 }
 `;
 
+// --- Toggle Switch Component ---
+interface ToggleSwitchProps {
+  enabled: boolean;
+  onChange: () => void;
+  color?: 'amber' | 'indigo' | 'slate';
+  size?: 'md' | 'lg';
+}
+
+const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ enabled, onChange, color = 'amber', size = 'lg' }) => {
+  const colorClasses = {
+    amber: enabled ? 'bg-amber-500 shadow-lg shadow-amber-300/50' : 'bg-slate-200',
+    indigo: enabled ? 'bg-indigo-500 shadow-lg shadow-indigo-300/50' : 'bg-slate-200',
+    slate: enabled ? 'bg-slate-500 shadow-lg shadow-slate-300/50' : 'bg-slate-200',
+  };
+
+  const sizeClasses = {
+    md: { outer: 'w-14 h-8', inner: 'w-6 h-6', translate: 'translate-x-7' },
+    lg: { outer: 'w-16 h-9 md:w-14 md:h-8', inner: 'w-7 h-7 md:w-6 md:h-6', translate: 'translate-x-8 md:translate-x-7' },
+  };
+
+  const { outer, inner, translate } = sizeClasses[size];
+
+  return (
+    <div className={`${outer} rounded-full transition-all duration-300 ${colorClasses[color]}`}>
+      <button onClick={onChange} className="w-full h-full">
+        <div className={`${inner} bg-white rounded-full shadow-lg transition-all duration-300 mt-1 ${enabled ? translate : 'translate-x-1'}`} />
+      </button>
+    </div>
+  );
+};
+
 // --- Toast Notification Component ---
 
 type ToastType = 'success' | 'delete' | 'edit' | 'info';
@@ -887,23 +918,18 @@ export default function App() {
                           </div>
                         </div>
                         {/* Toggle Switch - Larger for touch */}
-                        <div
-                          className={`w-16 h-9 md:w-14 md:h-8 rounded-full transition-all duration-300 ${editingRules.horse?.enabled ? 'bg-amber-500 shadow-lg shadow-amber-300/50' : 'bg-slate-200'}`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button
-                            onClick={() => {
-                              setEditingRules(prev => ({
-                                ...prev,
-                                horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, enabled: !prev.horse?.enabled }
-                              }));
-                              setHasUnsavedSettings(true);
-                            }}
-                            className="w-full h-full"
-                          >
-                            <div className={`w-7 h-7 md:w-6 md:h-6 bg-white rounded-full shadow-lg transition-all duration-300 mt-1 ${editingRules.horse?.enabled ? 'translate-x-8 md:translate-x-7' : 'translate-x-1'}`} />
-                          </button>
-                        </div>
+                        <ToggleSwitch
+                          enabled={editingRules.horse?.enabled ?? false}
+                          onChange={() => {
+                            setEditingRules(prev => ({
+                              ...prev,
+                              horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, enabled: !prev.horse?.enabled }
+                            }));
+                            setHasUnsavedSettings(true);
+                          }}
+                          color="amber"
+                          size="lg"
+                        />
                       </div>
 
                       {/* Expandable Content */}
@@ -1044,7 +1070,7 @@ export default function App() {
 
                             {/* Payout Mode - Larger buttons for touch */}
                             <div className="animate-[slideIn_0.3s_ease-out_0.1s_both]">
-                              <label className="text-xs md:text-sm font-semibold text-amber-700 block mb-2 md:mb-3">{t('horsePayoutMode')}</label>
+                              <label className="text-xs md:text-sm font-semibold text-amber-700 block mb-2">{t('horsePayoutMode')}</label>
                               <div className="grid grid-cols-3 gap-2 md:gap-3">
                                 {(['ADD_UNITS', 'ADD_FAAN', 'MULTIPLIER'] as const).map((mode) => (
                                   <button
@@ -1070,7 +1096,7 @@ export default function App() {
 
                             {/* Liability */}
                             <div className="animate-[slideIn_0.3s_ease-out_0.15s_both]">
-                              <label className="text-xs md:text-sm font-semibold text-amber-700 block mb-2 md:mb-3">{t('horseLiability')}</label>
+                              <label className="text-xs md:text-sm font-semibold text-amber-700 block mb-2">{t('horseLiability')}</label>
                               <div className="grid grid-cols-3 gap-2 md:gap-3">
                                 {(['ALL_PAY', 'DISCARDER_PAYS', 'SPLIT_PAY'] as const).map((liability) => (
                                   <button
