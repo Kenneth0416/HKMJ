@@ -941,7 +941,7 @@ export default function App() {
 
                                 {/* Per Horse Value */}
                                 <div>
-                                  <label className="font-bold text-slate-700 block text-sm mb-2">{t('perHorseValue')}</label>
+                                  <label className="font-bold text-slate-700 block text-sm mb-2">{t('perHorseValue')} ({lang === 'zh-HK' ? '底' : 'unit'})</label>
                                   <input
                                     type="number"
                                     min="0.5"
@@ -958,73 +958,13 @@ export default function App() {
                                   />
                                 </div>
 
-                                {/* Payout Mode */}
-                                <div>
-                                  <label className="font-bold text-slate-700 block text-sm mb-2">{t('horsePayoutMode')}</label>
-                                  <div className="grid grid-cols-3 gap-2">
-                                    {(['ADD_FAAN', 'MULTIPLIER', 'ADD_UNITS'] as const).map((mode) => (
-                                      <button
-                                        key={mode}
-                                        onClick={() => {
-                                          setEditingRules(prev => ({
-                                            ...prev,
-                                            horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, payoutMode: mode }
-                                          }));
-                                          setHasUnsavedSettings(true);
-                                        }}
-                                        className={`py-2 px-2 text-xs rounded-lg border font-medium transition-colors ${
-                                          editingRules.horse?.payoutMode === mode
-                                            ? 'bg-amber-500 text-white border-amber-500'
-                                            : 'bg-white text-slate-600 border-slate-200 hover:bg-amber-50'
-                                        }`}
-                                      >
-                                        {t(mode === 'ADD_FAAN' ? 'addFaan' : mode === 'MULTIPLIER' ? 'multiplier' : 'addUnits')}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* Liability */}
-                                <div>
-                                  <label className="font-bold text-slate-700 block text-sm mb-2">{t('horseLiability')}</label>
-                                  <div className="grid grid-cols-3 gap-2">
-                                    {(['ALL_PAY', 'DISCARDER_PAYS', 'SPLIT_PAY'] as const).map((liability) => (
-                                      <button
-                                        key={liability}
-                                        onClick={() => {
-                                          setEditingRules(prev => ({
-                                            ...prev,
-                                            horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, liability }
-                                          }));
-                                          setHasUnsavedSettings(true);
-                                        }}
-                                        className={`py-2 px-2 text-xs rounded-lg border font-medium transition-colors ${
-                                          editingRules.horse?.liability === liability
-                                            ? 'bg-amber-500 text-white border-amber-500'
-                                            : 'bg-white text-slate-600 border-slate-200 hover:bg-amber-50'
-                                        }`}
-                                      >
-                                        {t(liability === 'ALL_PAY' ? 'allPay' : liability === 'DISCARDER_PAYS' ? 'discarderPays' : 'splitPay')}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* Cap Applies */}
-                                <div className="flex items-center justify-between">
-                                  <span className="font-bold text-slate-700 text-sm">{t('horseCapApplies')}</span>
-                                  <button
-                                    onClick={() => {
-                                      setEditingRules(prev => ({
-                                        ...prev,
-                                        horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, capApplies: !prev.horse?.capApplies }
-                                      }));
-                                      setHasUnsavedSettings(true);
-                                    }}
-                                    className={`w-14 h-8 rounded-full transition-colors ${editingRules.horse?.capApplies ? 'bg-amber-500' : 'bg-slate-200'}`}
-                                  >
-                                    <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform ${editingRules.horse?.capApplies ? 'translate-x-7' : 'translate-x-1'}`} />
-                                  </button>
+                                {/* Horse Rules Description */}
+                                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+                                  <p className="font-medium mb-1">{lang === 'zh-HK' ? '計算規則：' : 'Calculation Rules:'}</p>
+                                  <ul className="text-xs space-y-1 text-amber-700">
+                                    <li>• {lang === 'zh-HK' ? '自摸：每中一馬，每家額外付 1 底' : 'Self-draw: Each hit adds 1 unit per player'}</li>
+                                    <li>• {lang === 'zh-HK' ? '出銃：每中一馬，出銃者包 3 底' : 'Discard: Each hit, discarder pays 3 units'}</li>
+                                  </ul>
                                 </div>
                               </>
                             )}
@@ -1148,7 +1088,12 @@ export default function App() {
                 {lang === 'zh-HK' ? '長按並拖拽卡片調整座位' : 'Long press and drag to reorder'}
               </p>
 
-              <div className="space-y-2 relative">
+              <div className="space-y-2 relative" ref={(container) => {
+                // Store container ref for bounds calculation
+                if (container) {
+                  (window as any).__seatEditorContainer = container;
+                }
+              }}>
                 {editingSeats.map((playerId, index) => {
                   const player = session.players[playerId];
                   const winds = [Wind.East, Wind.South, Wind.West, Wind.North];
@@ -1158,7 +1103,6 @@ export default function App() {
 
                   const handleTouchStart = (e: React.TouchEvent) => {
                     const touch = e.touches[0];
-                    // Store the initial Y position relative to this element's center
                     setTouchStartY(touch.clientY);
                     setDragOffsetY(0);
                   };
@@ -1167,38 +1111,45 @@ export default function App() {
                     const touch = e.touches[0];
                     if (touchStartY === null) return;
 
-                    const currentY = touch.clientY;
-                    const deltaY = currentY - touchStartY;
+                    const clientY = touch.clientY;
+                    const deltaY = clientY - touchStartY;
 
                     // Start dragging if moved enough
                     if (Math.abs(deltaY) > 5 && draggedIndex === null) {
                       setDraggedIndex(index);
-                      // Reset touchStartY to current position when starting drag
-                      // so deltaY is calculated from drag start position
                     }
 
                     if (draggedIndex !== null) {
                       setDragOffsetY(deltaY);
 
-                      // Find element under touch point
+                      // Use insertion point algorithm - compare with midY of each card
                       const elements = document.querySelectorAll('[data-seat-card]');
-                      let newDragOverIndex: number | null = null;
+                      const rects = Array.from(elements).map(el => el.getBoundingClientRect());
+                      const cardHeight = rects[0]?.height || 56;
 
-                      elements.forEach((el, i) => {
-                        if (i === draggedIndex) return; // Skip the dragged element itself
-                        const rect = el.getBoundingClientRect();
-                        const midY = (rect.top + rect.bottom) / 2;
+                      // Find insertion index based on clientY position
+                      let newInsertIndex = draggedIndex;
 
-                        // Check if touch is within this element's bounds
-                        if (currentY >= rect.top && currentY <= rect.bottom) {
-                          newDragOverIndex = i;
+                      for (let i = 0; i < rects.length; i++) {
+                        const rect = rects[i];
+                        const midY = rect.top + rect.height / 2;
+
+                        if (i < draggedIndex) {
+                          // Cards above: if clientY is above their midpoint, insert here
+                          if (clientY < midY) {
+                            newInsertIndex = i;
+                            break;
+                          }
+                        } else if (i > draggedIndex) {
+                          // Cards below: if clientY is below their midpoint, insert after them
+                          if (clientY > midY) {
+                            newInsertIndex = i;
+                          }
                         }
-                      });
+                      }
 
-                      if (newDragOverIndex !== null && newDragOverIndex !== dragOverIndex) {
-                        setDragOverIndex(newDragOverIndex);
-                      } else if (newDragOverIndex === null && dragOverIndex !== null) {
-                        // If not over any element, keep the last valid dragOverIndex
+                      if (newInsertIndex !== dragOverIndex) {
+                        setDragOverIndex(newInsertIndex);
                       }
                     }
                   };
@@ -1207,11 +1158,18 @@ export default function App() {
                     if (draggedIndex !== null && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
                       setEditingSeats(prev => {
                         const newOrder = [...prev];
-                        [newOrder[draggedIndex], newOrder[dragOverIndex]] = [newOrder[dragOverIndex], newOrder[draggedIndex]];
+                        const draggedItem = newOrder[draggedIndex];
+                        // Remove dragged item
+                        newOrder.splice(draggedIndex, 1);
+                        // Insert at new position
+                        newOrder.splice(dragOverIndex, 0, draggedItem);
                         return newOrder;
                       });
+                      // Update draggedIndex to new position for continuous dragging
+                      setDraggedIndex(dragOverIndex);
+                    } else {
+                      setDraggedIndex(null);
                     }
-                    setDraggedIndex(null);
                     setDragOverIndex(null);
                     setTouchStartY(null);
                     setDragOffsetY(0);
@@ -1220,13 +1178,20 @@ export default function App() {
                   // Calculate translateY for visual feedback
                   let translateY = 0;
                   if (isDragging) {
-                    // The dragged card follows the finger
                     translateY = dragOffsetY;
-                  } else if (isDragTarget && draggedIndex !== null) {
-                    // Other cards shift to make room
-                    // If dragged card is above (lower index), shift down; if below, shift up
-                    const direction = index < draggedIndex ? 1 : -1;
-                    translateY = direction * 56;
+                  } else if (draggedIndex !== null && dragOverIndex !== null) {
+                    // Shift cards between draggedIndex and dragOverIndex
+                    if (dragOverIndex < draggedIndex) {
+                      // Moving up: cards in between shift down
+                      if (index >= dragOverIndex && index < draggedIndex) {
+                        translateY = 56;
+                      }
+                    } else {
+                      // Moving down: cards in between shift up
+                      if (index > draggedIndex && index <= dragOverIndex) {
+                        translateY = -56;
+                      }
+                    }
                   }
 
                   return (
