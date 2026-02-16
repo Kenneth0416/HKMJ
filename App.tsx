@@ -995,7 +995,7 @@ export default function App() {
 
             <div className="p-4">
               <p className="text-sm text-slate-500 mb-4">
-                {lang === 'zh-HK' ? '拖拽玩家卡片調整座位位置' : 'Drag player cards to adjust seat positions'}
+                {lang === 'zh-HK' ? '長按並拖拽卡片調整座位' : 'Long press and drag to reorder'}
               </p>
 
               <div className="space-y-2">
@@ -1006,9 +1006,56 @@ export default function App() {
                   const isDragging = draggedIndex === index;
                   const isDragOver = dragOverIndex === index;
 
+                  const handleTouchStart = (e: React.TouchEvent) => {
+                    const touch = e.touches[0];
+                    const element = e.currentTarget;
+                    element.setAttribute('data-start-y', String(touch.clientY));
+                    element.setAttribute('data-index', String(index));
+                  };
+
+                  const handleTouchMove = (e: React.TouchEvent) => {
+                    const touch = e.touches[0];
+                    const element = e.currentTarget;
+                    const startY = parseFloat(element.getAttribute('data-start-y') || '0');
+                    const currentIndex = parseInt(element.getAttribute('data-index') || '0');
+
+                    const deltaY = touch.clientY - startY;
+
+                    // Start dragging if moved enough
+                    if (Math.abs(deltaY) > 10 && draggedIndex === null) {
+                      setDraggedIndex(currentIndex);
+                    }
+
+                    if (draggedIndex !== null) {
+                      // Find element under touch point
+                      const elements = document.querySelectorAll('[data-seat-card]');
+                      elements.forEach((el, i) => {
+                        const rect = el.getBoundingClientRect();
+                        if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+                          if (i !== draggedIndex && i !== dragOverIndex) {
+                            setDragOverIndex(i);
+                          }
+                        }
+                      });
+                    }
+                  };
+
+                  const handleTouchEnd = () => {
+                    if (draggedIndex !== null && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
+                      setEditingSeats(prev => {
+                        const newOrder = [...prev];
+                        [newOrder[draggedIndex], newOrder[dragOverIndex]] = [newOrder[dragOverIndex], newOrder[draggedIndex]];
+                        return newOrder;
+                      });
+                    }
+                    setDraggedIndex(null);
+                    setDragOverIndex(null);
+                  };
+
                   return (
                     <div
                       key={playerId}
+                      data-seat-card
                       draggable
                       onDragStart={(e) => {
                         setDraggedIndex(index);
@@ -1038,10 +1085,13 @@ export default function App() {
                         setDraggedIndex(null);
                         setDragOverIndex(null);
                       }}
-                      className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-grab active:cursor-grabbing transition-all ${
-                        isDragging ? 'opacity-50 scale-95 border-indigo-400' :
-                        isDragOver ? 'border-indigo-500 bg-indigo-50 scale-[1.02]' :
-                        'border-slate-200 bg-white hover:border-indigo-300'
+                      onTouchStart={handleTouchStart}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
+                      className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all touch-none select-none ${
+                        isDragging ? 'opacity-50 scale-95 border-indigo-400 bg-indigo-50' :
+                        isDragOver ? 'border-indigo-500 bg-indigo-100 scale-[1.02]' :
+                        'border-slate-200 bg-white active:bg-slate-50'
                       } ${isDealer ? 'ring-2 ring-indigo-200' : ''}`}
                     >
                       {/* Wind Position */}
@@ -1058,7 +1108,7 @@ export default function App() {
                       </div>
 
                       {/* Drag Handle */}
-                      <div className="text-slate-300 flex flex-col gap-0.5">
+                      <div className="text-slate-300 flex flex-col gap-0.5 shrink-0">
                         <div className="w-4 h-0.5 bg-current rounded" />
                         <div className="w-4 h-0.5 bg-current rounded" />
                         <div className="w-4 h-0.5 bg-current rounded" />
@@ -1071,10 +1121,7 @@ export default function App() {
               {/* Visual guide */}
               <div className="mt-4 p-3 bg-slate-50 rounded-lg">
                 <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
-                  <div className="flex items-center gap-1">
-                    <div className="w-4 h-4 rounded border-2 border-indigo-500 bg-indigo-50" />
-                    <span>{lang === 'zh-HK' ? '放置位置' : 'Drop here'}</span>
-                  </div>
+                  <span>{lang === 'zh-HK' ? '桌面：拖拽卡片 · 手機：長按後拖動' : 'Desktop: Drag · Mobile: Long press & drag'}</span>
                 </div>
               </div>
             </div>
