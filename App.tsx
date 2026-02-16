@@ -9,6 +9,8 @@ import LandingPage from './components/LandingPage';
 import PresetSelector from './components/PresetSelector';
 import HKMJRules from './components/HKMJRules';
 import { MahjongLogo } from './components/Logo';
+import StepperInput from './components/StepperInput';
+import SettingsCard from './components/SettingsCard';
 import { History, Settings, User, Trash2, Coins, Save, RotateCw, Edit2, Globe, BookOpen, Smartphone, Plus, LogOut, ScrollText, CheckCircle, Users, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
@@ -69,8 +71,8 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ enabled, onChange, color = 
 
   return (
     <div className={`${outer} rounded-full transition-all duration-300 ${colorClasses[color]}`} onClick={(e) => e.stopPropagation()}>
-      <button onClick={onChange} className="w-full h-full">
-        <div className={`${inner} bg-white rounded-full shadow-lg transition-all duration-300 mt-1 ${enabled ? translate : 'translate-x-1'}`} />
+      <button onClick={onChange} className="w-full h-full flex items-center">
+        <div className={`${inner} bg-white rounded-full shadow-lg transition-all duration-300 ml-1 ${enabled ? translate : ''}`} />
       </button>
     </div>
   );
@@ -1149,55 +1151,22 @@ export default function App() {
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">{t('parameters')}</h3>
 
                         {/* Unit Price Card */}
-                        <div className="bg-white rounded-2xl md:rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:border-indigo-200 transition-colors">
+                        <SettingsCard className="hover:border-indigo-200 transition-colors">
                           <div className="p-4 md:p-6">
                             <label className="text-sm md:text-base font-bold text-slate-700 block mb-1">{t('unitPrice')}</label>
                             <p className="text-xs text-slate-400 mb-3">{t('baseValue')}</p>
-                            <div className="flex items-center gap-2 md:gap-3">
-                              <button
-                                onClick={() => {
-                                  const newVal = Math.max(0.1, (editingRules.unitPrice || 10) - 1);
-                                  updateRuleValue('unitPrice', newVal);
-                                }}
-                                className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
-                              >−</button>
-                              <div className="flex-1 relative">
-                                <span className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">$</span>
-                                <input
-                                  type="number"
-                                  min="0.1"
-                                  step="0.1"
-                                  value={editingRules.unitPrice ?? ''}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (val === '') {
-                                      updateRuleValue('unitPrice', undefined as any);
-                                    } else {
-                                      const parsed = parseFloat(val);
-                                      if (!isNaN(parsed)) {
-                                        updateRuleValue('unitPrice', Math.max(0.1, parsed));
-                                      }
-                                    }
-                                  }}
-                                  onBlur={(e) => {
-                                    const val = e.target.value;
-                                    if (val === '' || parseFloat(val) < 0.1) {
-                                      updateRuleValue('unitPrice', 10);
-                                    }
-                                  }}
-                                  className="w-full h-12 md:h-11 bg-slate-50 text-slate-900 border-2 border-slate-200 rounded-xl px-4 pl-8 md:pl-9 font-mono font-bold text-xl md:text-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                                />
-                              </div>
-                              <button
-                                onClick={() => {
-                                  const newVal = (editingRules.unitPrice || 10) + 1;
-                                  updateRuleValue('unitPrice', newVal);
-                                }}
-                                className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
-                              >+</button>
-                            </div>
+                            <StepperInput
+                              value={editingRules.unitPrice}
+                              onChange={(val) => updateRuleValue('unitPrice', val)}
+                              min={0.1}
+                              step={1}
+                              defaultValue={10}
+                              isInteger={false}
+                              prefix="$"
+                              colorScheme="slate"
+                            />
                           </div>
-                        </div>
+                        </SettingsCard>
 
                         {/* Faan Range Card */}
                         <div className="bg-white rounded-2xl md:rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:border-indigo-200 transition-colors">
