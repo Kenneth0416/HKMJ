@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Player, PlayerId, RuleConfig, WinType, RoundResult } from '../types';
-import { calculateRoundDeltas, calculateBaseValue, calculateHorseBonusPerPlayer } from '../services/scoringService';
+import { calculateRoundDeltas, calculateBaseValue, calculateHorseBonus } from '../services/scoringService';
 import { X, Calculator, Edit3, AlertCircle, Sparkles } from 'lucide-react';
 
 interface NewRoundModalProps {
@@ -294,8 +294,8 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
                           {t('horseHits')}
                         </span>
                         {horseHits > 0 && (() => {
-                          const horseBonusPerPlayer = calculateHorseBonusPerPlayer(rules.horse!, horseHits, rules.unitPrice);
-                          const totalHorseBonus = horseBonusPerPlayer * 3; // 胡家收 3 家份
+                          const horseResult = calculateHorseBonus(rules.horse!, horseHits, faan, rules);
+                          const totalHorseBonus = horseResult.horseBonusTotal * 3; // 胡家收 3 家份 (自摸時)
                           return (
                             <span className="text-amber-600 font-bold text-sm">
                               +${totalHorseBonus} {t('horseBonus')}
