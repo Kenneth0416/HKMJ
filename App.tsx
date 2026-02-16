@@ -655,7 +655,8 @@ export default function App() {
                             </button>
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-                            {(Object.values(session.players) as Player[]).map(p => {
+                            {[0, 1, 3, 2].map(playerId => {
+                                const p = session.players[playerId as PlayerId];
                                 const scoreColor = p.score > 0 ? 'text-green-600' : p.score < 0 ? 'text-red-600' : 'text-slate-600';
                                 const isDealer = p.id === session.dealerId;
                                 return (
