@@ -942,131 +942,38 @@ export default function App() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 animate-[slideIn_0.3s_ease-out_0.05s_both]">
                               <div>
                                 <label className="text-xs md:text-sm font-semibold text-amber-700 block mb-2">{t('horseCount')}</label>
-                                <div className="flex items-center gap-2 md:gap-3">
-                                  <button
-                                    onClick={() => {
-                                      const newCount = Math.max(1, (editingRules.horse?.horseCount || 4) - 1);
-                                      setEditingRules(prev => ({
-                                        ...prev,
-                                        horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: newCount }
-                                      }));
-                                      setHasUnsavedSettings(true);
-                                    }}
-                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-white border-2 border-amber-200 text-amber-600 font-bold text-xl md:text-lg hover:bg-amber-50 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
-                                  >−</button>
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max="13"
-                                    value={editingRules.horse?.horseCount ?? ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      // Allow empty input during typing
-                                      if (val === '') {
-                                        setEditingRules(prev => ({
-                                          ...prev,
-                                          horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: undefined as any }
-                                        }));
-                                      } else {
-                                        const parsed = parseInt(val);
-                                        if (!isNaN(parsed)) {
-                                          setEditingRules(prev => ({
-                                            ...prev,
-                                            horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: Math.min(13, Math.max(1, parsed)) }
-                                          }));
-                                          setHasUnsavedSettings(true);
-                                        }
-                                      }
-                                    }}
-                                    onBlur={(e) => {
-                                      // Restore default on blur if empty or invalid
-                                      const val = e.target.value;
-                                      if (val === '' || parseInt(val) < 1) {
-                                        setEditingRules(prev => ({
-                                          ...prev,
-                                          horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: 4 }
-                                        }));
-                                        setHasUnsavedSettings(true);
-                                      }
-                                    }}
-                                    className="flex-1 h-12 md:h-11 bg-white text-amber-900 border-2 border-amber-200 rounded-xl text-center font-bold text-xl md:text-lg focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none"
-                                  />
-                                  <button
-                                    onClick={() => {
-                                      const newCount = Math.min(13, (editingRules.horse?.horseCount || 4) + 1);
-                                      setEditingRules(prev => ({
-                                        ...prev,
-                                        horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: newCount }
-                                      }));
-                                      setHasUnsavedSettings(true);
-                                    }}
-                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-white border-2 border-amber-200 text-amber-600 font-bold text-xl md:text-lg hover:bg-amber-50 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
-                                  >+</button>
-                                </div>
+                                <StepperInput
+                                  value={editingRules.horse?.horseCount ?? 4}
+                                  onChange={(val) => {
+                                    setEditingRules(prev => ({
+                                      ...prev,
+                                      horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: val }
+                                    }));
+                                    setHasUnsavedSettings(true);
+                                  }}
+                                  min={1}
+                                  max={13}
+                                  defaultValue={4}
+                                  colorScheme="amber"
+                                />
                               </div>
                               <div>
                                 <label className="text-xs md:text-sm font-semibold text-amber-700 block mb-2">{t('perHorseValue')} ({lang === 'zh-HK' ? '底' : 'unit'})</label>
-                                <div className="flex items-center gap-2 md:gap-3">
-                                  <button
-                                    onClick={() => {
-                                      const newVal = Math.max(0.5, (editingRules.horse?.perHorseValue || 1) - 0.5);
-                                      setEditingRules(prev => ({
-                                        ...prev,
-                                        horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: newVal }
-                                      }));
-                                      setHasUnsavedSettings(true);
-                                    }}
-                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-white border-2 border-amber-200 text-amber-600 font-bold text-xl md:text-lg hover:bg-amber-50 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
-                                  >−</button>
-                                  <input
-                                    type="number"
-                                    min="0.5"
-                                    step="0.5"
-                                    value={editingRules.horse?.perHorseValue ?? ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      // Allow empty input during typing
-                                      if (val === '') {
-                                        setEditingRules(prev => ({
-                                          ...prev,
-                                          horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: undefined as any }
-                                        }));
-                                      } else {
-                                        const parsed = parseFloat(val);
-                                        if (!isNaN(parsed)) {
-                                          setEditingRules(prev => ({
-                                            ...prev,
-                                            horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: Math.max(0.5, parsed) }
-                                          }));
-                                          setHasUnsavedSettings(true);
-                                        }
-                                      }
-                                    }}
-                                    onBlur={(e) => {
-                                      // Restore default on blur if empty or invalid
-                                      const val = e.target.value;
-                                      if (val === '' || parseFloat(val) < 0.5) {
-                                        setEditingRules(prev => ({
-                                          ...prev,
-                                          horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: 1 }
-                                        }));
-                                        setHasUnsavedSettings(true);
-                                      }
-                                    }}
-                                    className="flex-1 h-12 md:h-11 bg-white text-amber-900 border-2 border-amber-200 rounded-xl text-center font-bold text-xl md:text-lg focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none"
-                                  />
-                                  <button
-                                    onClick={() => {
-                                      const newVal = (editingRules.horse?.perHorseValue || 1) + 0.5;
-                                      setEditingRules(prev => ({
-                                        ...prev,
-                                        horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: newVal }
-                                      }));
-                                      setHasUnsavedSettings(true);
-                                    }}
-                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-white border-2 border-amber-200 text-amber-600 font-bold text-xl md:text-lg hover:bg-amber-50 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
-                                  >+</button>
-                                </div>
+                                <StepperInput
+                                  value={editingRules.horse?.perHorseValue ?? 1}
+                                  onChange={(val) => {
+                                    setEditingRules(prev => ({
+                                      ...prev,
+                                      horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: val }
+                                    }));
+                                    setHasUnsavedSettings(true);
+                                  }}
+                                  min={0.5}
+                                  step={0.5}
+                                  defaultValue={1}
+                                  isInteger={false}
+                                  colorScheme="amber"
+                                />
                               </div>
                             </div>
 
@@ -1169,7 +1076,7 @@ export default function App() {
                         </SettingsCard>
 
                         {/* Faan Range Card */}
-                        <div className="bg-white rounded-2xl md:rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:border-indigo-200 transition-colors">
+                        <SettingsCard className="hover:border-indigo-200 transition-colors">
                           <div className="p-4 md:p-6">
                             <div className="flex items-center justify-between mb-3">
                               <div>
@@ -1183,89 +1090,28 @@ export default function App() {
                             <div className="grid grid-cols-2 gap-3 md:gap-4">
                               <div>
                                 <label className="text-xs font-semibold text-slate-500 block mb-2">{t('minFaan')}</label>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={() => {
-                                      const newVal = Math.max(0, (editingRules.minFaan || 0) - 1);
-                                      updateRuleValue('minFaan', newVal);
-                                    }}
-                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
-                                  >−</button>
-                                  <input
-                                    type="number"
-                                    value={editingRules.minFaan ?? ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      if (val === '') {
-                                        updateRuleValue('minFaan', undefined as any);
-                                      } else {
-                                        const parsed = parseInt(val);
-                                        if (!isNaN(parsed)) {
-                                          updateRuleValue('minFaan', Math.max(0, parsed));
-                                        }
-                                      }
-                                    }}
-                                    onBlur={(e) => {
-                                      const val = e.target.value;
-                                      if (val === '' || parseInt(val) < 0) {
-                                        updateRuleValue('minFaan', 0);
-                                      }
-                                    }}
-                                    className="flex-1 h-12 md:h-11 bg-slate-50 text-slate-900 border-2 border-slate-200 rounded-xl text-center font-bold text-xl md:text-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                                  />
-                                  <button
-                                    onClick={() => {
-                                      const newVal = Math.min(editingRules.maxFaan || 10, (editingRules.minFaan || 0) + 1);
-                                      updateRuleValue('minFaan', newVal);
-                                    }}
-                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
-                                  >+</button>
-                                </div>
+                                <StepperInput
+                                  value={editingRules.minFaan}
+                                  onChange={(val) => updateRuleValue('minFaan', Math.min(val, editingRules.maxFaan))}
+                                  min={0}
+                                  max={editingRules.maxFaan}
+                                  defaultValue={0}
+                                  colorScheme="slate"
+                                />
                               </div>
                               <div>
                                 <label className="text-xs font-semibold text-slate-500 block mb-2">{t('maxFaan')}</label>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={() => {
-                                      const newVal = Math.max(editingRules.minFaan || 0, (editingRules.maxFaan || 10) - 1);
-                                      updateRuleValue('maxFaan', newVal);
-                                    }}
-                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
-                                  >−</button>
-                                  <input
-                                    type="number"
-                                    value={editingRules.maxFaan ?? ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      if (val === '') {
-                                        updateRuleValue('maxFaan', undefined as any);
-                                      } else {
-                                        const parsed = parseInt(val);
-                                        if (!isNaN(parsed)) {
-                                          updateRuleValue('maxFaan', Math.max(0, parsed));
-                                        }
-                                      }
-                                    }}
-                                    onBlur={(e) => {
-                                      const val = e.target.value;
-                                      if (val === '' || parseInt(val) < editingRules.minFaan) {
-                                        updateRuleValue('maxFaan', editingRules.minFaan || 10);
-                                      }
-                                    }}
-                                    className="flex-1 h-12 md:h-11 bg-slate-50 text-slate-900 border-2 border-slate-200 rounded-xl text-center font-bold text-xl md:text-lg focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                                  />
-                                  <button
-                                    onClick={() => {
-                                      const newVal = (editingRules.maxFaan || 10) + 1;
-                                      updateRuleValue('maxFaan', newVal);
-                                    }}
-                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-slate-50 border-2 border-slate-200 text-slate-600 font-bold text-xl md:text-lg hover:bg-slate-100 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
-                                  >+</button>
-                                </div>
+                                <StepperInput
+                                  value={editingRules.maxFaan}
+                                  onChange={(val) => updateRuleValue('maxFaan', Math.max(val, editingRules.minFaan))}
+                                  min={editingRules.minFaan}
+                                  defaultValue={10}
+                                  colorScheme="slate"
+                                />
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </SettingsCard>
 
                         {/* Wind Follows Dealer Toggle */}
                         <div className={`rounded-2xl md:rounded-3xl transition-all duration-300 ${editingRules.windFollowsDealer ? 'bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-300 shadow-lg shadow-indigo-100/50' : 'bg-white border border-slate-200 shadow-sm hover:border-indigo-200'}`}>

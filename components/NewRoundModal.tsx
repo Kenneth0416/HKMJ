@@ -34,7 +34,7 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
 
   // Mode B State
   const [manualDeltas, setManualDeltas] = useState<Record<PlayerId, string>>({
-    0: '0', 1: '0', 2: '0', 3: '0'
+    0: '', 1: '', 2: '', 3: ''
   });
 
   const [note, setNote] = useState('');
@@ -52,7 +52,7 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
 
          if (initialData.type === 'MANUAL') {
             setMode('MANUAL');
-            const stringDeltas: Record<PlayerId, string> = { 0:'0', 1:'0', 2:'0', 3:'0' };
+            const stringDeltas: Record<PlayerId, string> = { 0:'', 1:'', 2:'', 3:'' };
             Object.entries(initialData.deltas).forEach(([k, v]) => {
                 stringDeltas[parseInt(k) as PlayerId] = v.toString();
             });
@@ -80,7 +80,7 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
          setNote('');
          setWinType(WinType.SelfDraw);
          setHorseHits(0);
-         setManualDeltas({ 0: '0', 1: '0', 2: '0', 3: '0' });
+         setManualDeltas({ 0: '', 1: '', 2: '', 3: '' });
          // Reset winner to next player or dealer roughly?
          // Just keeping default 0 is fine, user will select.
        }
@@ -371,7 +371,8 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
                       type="number"
                       value={manualDeltas[p.id]}
                       onChange={(e) => handleManualChange(p.id, e.target.value)}
-                      className="flex-1 bg-white text-slate-900 border rounded px-3 py-2 text-right font-mono"
+                      onFocus={(e) => e.target.select()}
+                      className="flex-1 bg-white text-slate-900 border rounded px-3 py-2 text-right font-mono focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none"
                       placeholder="0"
                     />
                   </div>
@@ -379,7 +380,7 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
               </div>
               <div className={`flex justify-between items-center text-sm font-bold border-t pt-2 ${getManualSum() !== 0 ? 'text-red-600' : 'text-green-600'}`}>
                 <span>{t('total')}:</span>
-                <span>{getManualSum()}</span>
+                <span>{getManualSum() || '0'}</span>
               </div>
             </div>
           )}
