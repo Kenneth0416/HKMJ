@@ -1158,31 +1158,47 @@ export default function App() {
 
                   const handleTouchStart = (e: React.TouchEvent) => {
                     const touch = e.touches[0];
+                    // Store the initial Y position relative to this element's center
                     setTouchStartY(touch.clientY);
+                    setDragOffsetY(0);
                   };
 
                   const handleTouchMove = (e: React.TouchEvent) => {
                     const touch = e.touches[0];
                     if (touchStartY === null) return;
 
-                    const deltaY = touch.clientY - touchStartY;
+                    const currentY = touch.clientY;
+                    const deltaY = currentY - touchStartY;
 
+                    // Start dragging if moved enough
                     if (Math.abs(deltaY) > 5 && draggedIndex === null) {
                       setDraggedIndex(index);
+                      // Reset touchStartY to current position when starting drag
+                      // so deltaY is calculated from drag start position
                     }
 
                     if (draggedIndex !== null) {
                       setDragOffsetY(deltaY);
+
+                      // Find element under touch point
                       const elements = document.querySelectorAll('[data-seat-card]');
-                      let foundIndex: number | null = null;
+                      let newDragOverIndex: number | null = null;
+
                       elements.forEach((el, i) => {
+                        if (i === draggedIndex) return; // Skip the dragged element itself
                         const rect = el.getBoundingClientRect();
-                        if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-                          foundIndex = i;
+                        const midY = (rect.top + rect.bottom) / 2;
+
+                        // Check if touch is within this element's bounds
+                        if (currentY >= rect.top && currentY <= rect.bottom) {
+                          newDragOverIndex = i;
                         }
                       });
-                      if (foundIndex !== null && foundIndex !== dragOverIndex) {
-                        setDragOverIndex(foundIndex);
+
+                      if (newDragOverIndex !== null && newDragOverIndex !== dragOverIndex) {
+                        setDragOverIndex(newDragOverIndex);
+                      } else if (newDragOverIndex === null && dragOverIndex !== null) {
+                        // If not over any element, keep the last valid dragOverIndex
                       }
                     }
                   };
@@ -1201,11 +1217,16 @@ export default function App() {
                     setDragOffsetY(0);
                   };
 
+                  // Calculate translateY for visual feedback
                   let translateY = 0;
                   if (isDragging) {
+                    // The dragged card follows the finger
                     translateY = dragOffsetY;
                   } else if (isDragTarget && draggedIndex !== null) {
-                    translateY = (index < draggedIndex ? 1 : -1) * 56;
+                    // Other cards shift to make room
+                    // If dragged card is above (lower index), shift down; if below, shift up
+                    const direction = index < draggedIndex ? 1 : -1;
+                    translateY = direction * 56;
                   }
 
                   return (
