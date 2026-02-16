@@ -63,8 +63,8 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ enabled, onChange, color = 
   };
 
   const sizeClasses = {
-    md: { outer: 'w-14 h-8', inner: 'w-6 h-6', translate: 'translate-x-7' },
-    lg: { outer: 'w-16 h-9 md:w-14 md:h-8', inner: 'w-7 h-7 md:w-6 md:h-6', translate: 'translate-x-8 md:translate-x-7' },
+    md: { outer: 'w-14 h-8', inner: 'w-6 h-6', translate: 'translate-x-6' },
+    lg: { outer: 'w-16 h-9 md:w-14 md:h-8', inner: 'w-7 h-7 md:w-6 md:h-6', translate: 'translate-x-7 md:translate-x-6' },
   };
 
   const { outer, inner, translate } = sizeClasses[size];
