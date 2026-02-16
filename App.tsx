@@ -9,7 +9,7 @@ import LandingPage from './components/LandingPage';
 import PresetSelector from './components/PresetSelector';
 import HKMJRules from './components/HKMJRules';
 import { MahjongLogo } from './components/Logo';
-import { History, Settings, User, Trash2, Coins, Save, RotateCw, Sigma, Edit2, Globe, BookOpen, Smartphone, Plus, LogOut, ScrollText, CheckCircle, Users, ArrowRight } from 'lucide-react';
+import { History, Settings, User, Trash2, Coins, Save, RotateCw, Sigma, Edit2, Globe, BookOpen, Smartphone, Plus, LogOut, ScrollText, CheckCircle, Users } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 // Check if running on native platform
@@ -133,6 +133,8 @@ export default function App() {
 
   // Seat Editor State
   const [editingSeats, setEditingSeats] = useState<PlayerId[]>([0, 1, 2, 3]);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   // Toast State
   const [showToast, setShowToast] = useState(false);
@@ -991,66 +993,88 @@ export default function App() {
               <h2 className="text-lg font-bold">{lang === 'zh-HK' ? '編輯座位' : 'Edit Seats'}</h2>
             </div>
 
-            <div className="p-4 space-y-3">
+            <div className="p-4">
               <p className="text-sm text-slate-500 mb-4">
-                {lang === 'zh-HK' ? '點擊玩家卡片交換座位位置' : 'Tap player cards to swap seat positions'}
+                {lang === 'zh-HK' ? '拖拽玩家卡片調整座位位置' : 'Drag player cards to adjust seat positions'}
               </p>
 
-              {editingSeats.map((playerId, index) => {
-                const player = session.players[playerId];
-                const winds = [Wind.East, Wind.South, Wind.West, Wind.North];
-                const isDealer = playerId === session.dealerId;
+              <div className="space-y-2">
+                {editingSeats.map((playerId, index) => {
+                  const player = session.players[playerId];
+                  const winds = [Wind.East, Wind.South, Wind.West, Wind.North];
+                  const isDealer = playerId === session.dealerId;
+                  const isDragging = draggedIndex === index;
+                  const isDragOver = dragOverIndex === index;
 
-                return (
-                  <div key={index} className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200">
-                      {winds[index]}
-                    </div>
-                    <ArrowRight size={16} className="text-slate-300" />
-                    <button
-                      onClick={() => {
-                        // Swap with next position
-                        if (index < 3) {
-                          swapSeats(index, index + 1);
-                        } else {
-                          swapSeats(index, 0);
-                        }
+                  return (
+                    <div
+                      key={playerId}
+                      draggable
+                      onDragStart={(e) => {
+                        setDraggedIndex(index);
+                        e.dataTransfer.effectAllowed = 'move';
                       }}
-                      className={`flex-1 p-3 rounded-lg border text-left transition-all ${
-                        isDealer ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 hover:border-indigo-300 bg-white'
-                      }`}
+                      onDragEnd={() => {
+                        setDraggedIndex(null);
+                        setDragOverIndex(null);
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        setDragOverIndex(index);
+                      }}
+                      onDragLeave={() => {
+                        setDragOverIndex(null);
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        if (draggedIndex !== null && draggedIndex !== index) {
+                          setEditingSeats(prev => {
+                            const newOrder = [...prev];
+                            [newOrder[draggedIndex], newOrder[index]] = [newOrder[index], newOrder[draggedIndex]];
+                            return newOrder;
+                          });
+                        }
+                        setDraggedIndex(null);
+                        setDragOverIndex(null);
+                      }}
+                      className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-grab active:cursor-grabbing transition-all ${
+                        isDragging ? 'opacity-50 scale-95 border-indigo-400' :
+                        isDragOver ? 'border-indigo-500 bg-indigo-50 scale-[1.02]' :
+                        'border-slate-200 bg-white hover:border-indigo-300'
+                      } ${isDealer ? 'ring-2 ring-indigo-200' : ''}`}
                     >
-                      <span className="font-bold text-slate-800">{player.name}</span>
-                      {isDealer && (
-                        <span className="ml-2 text-xs bg-indigo-600 text-white px-1.5 py-0.5 rounded">莊</span>
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
+                      {/* Wind Position */}
+                      <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200 shrink-0">
+                        {winds[index]}
+                      </div>
 
-              {/* Quick swap buttons */}
-              <div className="pt-4 border-t border-slate-100">
-                <p className="text-xs text-slate-400 mb-2">{lang === 'zh-HK' ? '快速調整' : 'Quick Adjust'}</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => swapSeats(0, 1)}
-                    className="flex-1 py-2 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-                  >
-                    東↔南
-                  </button>
-                  <button
-                    onClick={() => swapSeats(1, 2)}
-                    className="flex-1 py-2 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-                  >
-                    南↔西
-                  </button>
-                  <button
-                    onClick={() => swapSeats(2, 3)}
-                    className="flex-1 py-2 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-                  >
-                    西↔北
-                  </button>
+                      {/* Player Name */}
+                      <div className="flex-1 min-w-0">
+                        <span className="font-bold text-slate-800 truncate block">{player.name}</span>
+                        {isDealer && (
+                          <span className="text-xs text-indigo-600">莊家</span>
+                        )}
+                      </div>
+
+                      {/* Drag Handle */}
+                      <div className="text-slate-300 flex flex-col gap-0.5">
+                        <div className="w-4 h-0.5 bg-current rounded" />
+                        <div className="w-4 h-0.5 bg-current rounded" />
+                        <div className="w-4 h-0.5 bg-current rounded" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Visual guide */}
+              <div className="mt-4 p-3 bg-slate-50 rounded-lg">
+                <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
+                  <div className="flex items-center gap-1">
+                    <div className="w-4 h-4 rounded border-2 border-indigo-500 bg-indigo-50" />
+                    <span>{lang === 'zh-HK' ? '放置位置' : 'Drop here'}</span>
+                  </div>
                 </div>
               </div>
             </div>
