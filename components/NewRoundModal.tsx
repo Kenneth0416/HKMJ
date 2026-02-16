@@ -296,7 +296,6 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
                         {horseHits > 0 && (() => {
                           // 計算馬獎顯示
                           const originalBase = calculateBaseValue(faan, rules.unitPrice);
-                          let newBase = originalBase;
                           let horseBonusDisplay = 0;
 
                           switch (rules.horse!.payoutMode) {
@@ -306,13 +305,14 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
                               if (rules.horse!.capApplies) {
                                 newFaan = Math.min(newFaan, rules.maxFaan);
                               }
-                              newBase = calculateBaseValue(newFaan, rules.unitPrice);
+                              const newBase = calculateBaseValue(newFaan, rules.unitPrice);
                               horseBonusDisplay = (newBase - originalBase) * 3; // 3 家份
                               break;
                             }
                             case 'MULTIPLIER': {
-                              // 倍數模式
-                              const multiplier = rules.horse!.perHorseValue * horseHits;
+                              // 倍數模式：每中一馬翻 N 倍
+                              // 例如 perHorseValue = 2，horseHits = 1，則 base * 2
+                              const multiplier = Math.pow(rules.horse!.perHorseValue, horseHits);
                               horseBonusDisplay = originalBase * (multiplier - 1) * 3;
                               break;
                             }

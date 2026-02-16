@@ -93,24 +93,29 @@ export const calculateRoundDeltas = (
   // 3. Calculate horse bonus if enabled
   const horseConfig = rules.horse;
   let horseBonusPerPlayer = 0;  // 每家額外付的馬獎
+  let hasHorseBonus = false;  // 是否有馬獎（包括加番模式的額外價值）
 
   if (horseConfig?.enabled && horseHits && horseHits > 0) {
+    hasHorseBonus = true;
     switch (horseConfig.payoutMode) {
       case 'ADD_FAAN': {
-        // 加番模式：馬直接加到番數上，不用額外計算馬獎
-        // 因為 effectiveFaan 會增加，baseValue 自然增加
+        // 加番模式：馬直接加到番數上
+        // 計算原番數的價值和新番數的價值差額，這差額就是「馬獎」
         let newFaan = rawFaan + (horseHits * horseConfig.perHorseValue);
         if (horseConfig.capApplies) {
           newFaan = Math.min(newFaan, rules.maxFaan);
         }
         effectiveFaan = newFaan;
-        // ADD_FAAN 模式下 horseBonusPerPlayer = 0，因為已經體現在番數增加上了
-        horseBonusPerPlayer = 0;
+        // 計算因加番而增加的價值（作為馬獎）
+        const newBaseValue = calculateBaseValue(effectiveFaan, rules.unitPrice);
+        horseBonusPerPlayer = newBaseValue - originalBaseValue;
         break;
       }
       case 'MULTIPLIER': {
-        // 倍數模式：baseValue 乘以倍數
-        const multiplier = horseConfig.perHorseValue * horseHits;
+        // 倍數模式：每中一馬翻 N 倍
+        // 例如 perHorseValue = 2，horseHits = 1，則 base * 2
+        // perHorseValue = 2，horseHits = 2，則 base * 4
+        const multiplier = Math.pow(horseConfig.perHorseValue, horseHits);
         horseBonusPerPlayer = originalBaseValue * (multiplier - 1);
         break;
       }
@@ -148,11 +153,11 @@ export const calculateRoundDeltas = (
       if (pid !== winnerId) {
         let playerPays = -finalBaseValue;
 
-        // Add horse bonus based on liability (for non-ADD_FAAN modes)
-        if (horseBonusPerPlayer > 0 && horseConfig && horseConfig.payoutMode !== 'ADD_FAAN') {
+        // Add horse bonus based on liability
+        if (hasHorseBonus && horseConfig) {
           switch (horseConfig.liability) {
             case 'ALL_PAY':
-              // 三家付：每家固定付 horseBonusPerPlayer（不是除3）
+              // 三家付：每家固定付馬獎
               playerPays -= finalHorseBonus;
               break;
             case 'SPLIT_PAY':
@@ -177,7 +182,7 @@ export const calculateRoundDeltas = (
     const loserPays = -finalBaseValue;
 
     // 馬獎根據 liability 分配
-    if (horseBonusPerPlayer > 0 && horseConfig && horseConfig.payoutMode !== 'ADD_FAAN') {
+    if (hasHorseBonus && horseConfig) {
       switch (horseConfig.liability) {
         case 'ALL_PAY':
           // 三家付：base 由出衄者付，馬獎由三家（不包括胡家）各付一份
@@ -217,7 +222,7 @@ export const calculateRoundDeltas = (
       }
     }
 
-    // 沒有馬獎或 ADD_FAAN 模式（馬獎已計入番數）
+    // 沒有馬獎
     deltas[loserId] = loserPays;
     deltas[winnerId] = finalBaseValue;
   }
