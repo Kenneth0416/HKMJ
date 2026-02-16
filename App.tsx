@@ -1126,18 +1126,18 @@ export default function App() {
                                 <span className="text-sm md:text-base font-semibold text-amber-700">{t('horseCapApplies')}</span>
                                 <span className="hidden sm:inline text-xs text-amber-500/70">({lang === 'zh-HK' ? '上限生效' : 'Cap applies'})</span>
                               </div>
-                              <button
-                                onClick={() => {
+                              <ToggleSwitch
+                                enabled={editingRules.horse?.capApplies ?? false}
+                                onChange={() => {
                                   setEditingRules(prev => ({
                                     ...prev,
                                     horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, capApplies: !prev.horse?.capApplies }
                                   }));
                                   setHasUnsavedSettings(true);
                                 }}
-                                className={`w-14 h-8 rounded-full transition-all duration-300 touch-manipulation ${editingRules.horse?.capApplies ? 'bg-amber-500 shadow-lg shadow-amber-300/50' : 'bg-amber-200'}`}
-                              >
-                                <div className={`w-6 h-6 bg-white rounded-full shadow-lg transition-all duration-300 mt-1 ${editingRules.horse?.capApplies ? 'translate-x-7' : 'translate-x-1'}`} />
-                              </button>
+                                color="amber"
+                                size="md"
+                              />
                             </div>
                           </div>
                         </div>
@@ -1318,23 +1318,18 @@ export default function App() {
                                     <span className={`text-xs transition-colors ${editingRules.windFollowsDealer ? 'text-indigo-600' : 'text-slate-400'}`}>{lang === 'zh-HK' ? '莊家永遠是東位' : 'Dealer is always East'}</span>
                                   </div>
                                 </div>
-                                <div
-                                  className={`w-16 h-9 md:w-14 md:h-8 rounded-full transition-all duration-300 ${editingRules.windFollowsDealer ? 'bg-indigo-500 shadow-lg shadow-indigo-300/50' : 'bg-slate-200'}`}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <button
-                                    onClick={() => {
-                                      setEditingRules(prev => ({
-                                        ...prev,
-                                        windFollowsDealer: !prev.windFollowsDealer
-                                      }));
-                                      setHasUnsavedSettings(true);
-                                    }}
-                                    className="w-full h-full"
-                                  >
-                                    <div className={`w-7 h-7 md:w-6 md:h-6 bg-white rounded-full shadow-lg transition-all duration-300 mt-1 ${editingRules.windFollowsDealer ? 'translate-x-8 md:translate-x-7' : 'translate-x-1'}`} />
-                                  </button>
-                                </div>
+                                <ToggleSwitch
+                                  enabled={editingRules.windFollowsDealer}
+                                  onChange={() => {
+                                    setEditingRules(prev => ({
+                                      ...prev,
+                                      windFollowsDealer: !prev.windFollowsDealer
+                                    }));
+                                    setHasUnsavedSettings(true);
+                                  }}
+                                  color="indigo"
+                                  size="lg"
+                                />
                             </div>
                         </div>
 
