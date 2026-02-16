@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Player, PlayerId, RuleConfig, WinType, RoundResult } from '../types';
-import { calculateRoundDeltas, calculateBaseValue } from '../services/scoringService';
-import { X, Calculator, Edit3, AlertCircle } from 'lucide-react';
+import { calculateRoundDeltas, calculateBaseValue, calculateHorseBonus } from '../services/scoringService';
+import { X, Calculator, Edit3, AlertCircle, Sparkles } from 'lucide-react';
 
 interface NewRoundModalProps {
   isOpen: boolean;
@@ -17,18 +17,20 @@ interface NewRoundModalProps {
     loserId: PlayerId | null;
     faan?: number;
     note?: string;
+    horseHits?: number;
   }) => void;
   t: (key: any, params?: any) => string;
 }
 
 const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players, dealerId, rules, initialData, onSubmit, t }) => {
   const [mode, setMode] = useState<'CALCULATED' | 'MANUAL'>('CALCULATED');
-  
+
   // Mode A State
   const [winType, setWinType] = useState<WinType>(WinType.SelfDraw);
   const [winnerId, setWinnerId] = useState<PlayerId>(0);
   const [loserId, setLoserId] = useState<PlayerId>(1); // For discard
   const [faan, setFaan] = useState<number>(3); // Default starting value
+  const [horseHits, setHorseHits] = useState<number>(0); // 跑馬仔中馬數
 
   // Mode B State
   const [manualDeltas, setManualDeltas] = useState<Record<PlayerId, string>>({
@@ -46,7 +48,8 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
        if (initialData) {
          // --- EDIT MODE ---
          setNote(initialData.note || '');
-         
+         setHorseHits(initialData.horseHits || 0);
+
          if (initialData.type === 'MANUAL') {
             setMode('MANUAL');
             const stringDeltas: Record<PlayerId, string> = { 0:'0', 1:'0', 2:'0', 3:'0' };
@@ -57,7 +60,7 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
          } else {
             setMode('CALCULATED');
             setFaan(initialData.faan || rules.minFaan);
-            
+
             // Infer WinType based on winner/loser
             if (initialData.winnerId === null) {
                 setWinType(WinType.Draw);
@@ -76,8 +79,9 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
          setFaan(Math.max(rules.minFaan, 0));
          setNote('');
          setWinType(WinType.SelfDraw);
+         setHorseHits(0);
          setManualDeltas({ 0: '0', 1: '0', 2: '0', 3: '0' });
-         // Reset winner to next player or dealer roughly? 
+         // Reset winner to next player or dealer roughly?
          // Just keeping default 0 is fine, user will select.
        }
     }
@@ -85,10 +89,10 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
 
   useEffect(() => {
     if (mode === 'CALCULATED') {
-      const deltas = calculateRoundDeltas(rules, winType, winnerId, winType === WinType.Discard ? loserId : null, faan, dealerId);
+      const deltas = calculateRoundDeltas(rules, winType, winnerId, winType === WinType.Discard ? loserId : null, faan, dealerId, horseHits);
       setPreviewDeltas(deltas);
     }
-  }, [mode, winType, winnerId, loserId, faan, rules, dealerId]);
+  }, [mode, winType, winnerId, loserId, faan, rules, dealerId, horseHits]);
 
   if (!isOpen) return null;
 
@@ -113,7 +117,8 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
         winnerId: winType === WinType.Draw ? null : winnerId,
         loserId: winType === WinType.Discard ? loserId : null,
         faan: winType === WinType.Draw ? 0 : faan,
-        note
+        note,
+        horseHits: horseHits > 0 ? horseHits : undefined
       });
     } else {
       const sum = getManualSum();
@@ -279,6 +284,45 @@ const NewRoundModal: React.FC<NewRoundModalProps> = ({ isOpen, onClose, players,
                       )}
                     </div>
                   </div>
+
+                  {/* Horse (跑馬仔) Input - Only show if enabled and not Draw */}
+                  {rules.horse?.enabled && winType !== WinType.Draw && (
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-xl border border-amber-200">
+                      <label className="block text-sm font-semibold text-amber-800 mb-3 flex justify-between items-center">
+                        <span className="flex items-center gap-2">
+                          <Sparkles size={16} className="text-amber-500" />
+                          {t('horseHits')}
+                        </span>
+                        {horseHits > 0 && (
+                          <span className="text-amber-600 font-bold text-sm">
+                            +${rules.horse.perHorseValue * horseHits} {t('horseBonus')}
+                          </span>
+                        )}
+                      </label>
+                      <div className="flex items-center justify-center gap-3">
+                        <button
+                          onClick={() => setHorseHits(Math.max(0, horseHits - 1))}
+                          className="w-12 h-12 rounded-xl bg-amber-100 hover:bg-amber-200 active:bg-amber-300 border-2 border-amber-300 flex items-center justify-center text-2xl font-bold text-amber-600 active:scale-95 transition-all"
+                        >
+                          −
+                        </button>
+                        <div className="flex-1 max-w-[100px]">
+                          <div className="text-center text-3xl font-bold text-amber-700">
+                            {t('horseHitsLabel', { n: horseHits })}
+                          </div>
+                          <div className="text-center text-xs text-amber-500 mt-1">
+                            0 - {rules.horse.horseCount}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setHorseHits(Math.min(rules.horse?.horseCount || 4, horseHits + 1))}
+                          className="w-12 h-12 rounded-xl bg-amber-100 hover:bg-amber-200 active:bg-amber-300 border-2 border-amber-300 flex items-center justify-center text-2xl font-bold text-amber-600 active:scale-95 transition-all"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Preview Calculation */}
                   <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
