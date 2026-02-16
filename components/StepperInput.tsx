@@ -14,6 +14,8 @@ interface StepperInputProps {
   colorScheme?: ColorScheme;
   className?: string;
   inputClassName?: string;
+  /** Use smart stepping: increment to next integer, decrement to prev integer or 0.5 */
+  smartStep?: boolean;
 }
 
 const colorConfigs: Record<ColorScheme, {
@@ -50,6 +52,7 @@ const StepperInput: React.FC<StepperInputProps> = ({
   colorScheme = 'slate',
   className = '',
   inputClassName = '',
+  smartStep = false,
 }) => {
   const colors = colorConfigs[colorScheme];
 
@@ -68,13 +71,43 @@ const StepperInput: React.FC<StepperInputProps> = ({
   const currentValue = value ?? defaultValue ?? min;
 
   const handleDecrement = () => {
-    const newVal = Math.max(min, currentValue - step);
+    let newVal: number;
+
+    if (smartStep) {
+      // Smart decrement: go to previous integer or 0.5
+      if (currentValue <= 0.5) {
+        newVal = Math.max(min, 0.5);
+      } else if (currentValue <= 1) {
+        newVal = Math.max(min, 0.5);
+      } else {
+        // Decrement to previous integer
+        newVal = Math.max(min, Math.floor(currentValue - 0.001));
+      }
+    } else {
+      newVal = Math.max(min, currentValue - step);
+    }
+
     const finalVal = isInteger ? Math.round(newVal) : newVal;
     onChange(finalVal);
   };
 
   const handleIncrement = () => {
-    const newVal = Math.min(max, currentValue + step);
+    let newVal: number;
+
+    if (smartStep) {
+      // Smart increment: go to next integer
+      if (currentValue < 0.5) {
+        newVal = 0.5;
+      } else if (currentValue < 1) {
+        newVal = 1;
+      } else {
+        // Increment to next integer
+        newVal = Math.min(max, Math.ceil(currentValue + 0.001));
+      }
+    } else {
+      newVal = Math.min(max, currentValue + step);
+    }
+
     const finalVal = isInteger ? Math.round(newVal) : newVal;
     onChange(finalVal);
   };

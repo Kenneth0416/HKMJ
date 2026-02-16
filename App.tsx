@@ -1086,12 +1086,12 @@ export default function App() {
                             <StepperInput
                               value={editingRules.unitPrice}
                               onChange={(val) => updateRuleValue('unitPrice', val)}
-                              min={0.1}
-                              step={1}
+                              min={0.5}
                               defaultValue={10}
                               isInteger={false}
                               prefix="$"
                               colorScheme="slate"
+                              smartStep
                             />
                           </div>
                         </SettingsCard>
