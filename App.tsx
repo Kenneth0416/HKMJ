@@ -9,7 +9,7 @@ import LandingPage from './components/LandingPage';
 import PresetSelector from './components/PresetSelector';
 import HKMJRules from './components/HKMJRules';
 import { MahjongLogo } from './components/Logo';
-import { History, Settings, User, Trash2, Coins, Save, RotateCw, Sigma, Edit2, Globe, BookOpen, Smartphone, Plus, LogOut, ScrollText, CheckCircle } from 'lucide-react';
+import { History, Settings, User, Trash2, Coins, Save, RotateCw, Sigma, Edit2, Globe, BookOpen, Smartphone, Plus, LogOut, ScrollText, CheckCircle, Users, ArrowRight } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 
 // Check if running on native platform
@@ -119,15 +119,16 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNewGameModalOpen, setIsNewGameModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'SCORE' | 'RULES' | 'HISTORY' | 'SETTINGS'>('SCORE');
+  const [isSeatEditorOpen, setIsSeatEditorOpen] = useState(false);
 
   // Delete Modal State
   const [roundToDelete, setRoundToDelete] = useState<string | null>(null);
 
   // Edit State
   const [editingRound, setEditingRound] = useState<RoundResult | null>(null);
-  
-  // Settings Tab Local State
-  const [editingRules, setEditingRules] = useState<RuleConfig>(session.rules);
+
+  // Seat Editor State
+  const [editingSeats, setEditingSeats] = useState<PlayerId[]>([0, 1, 2, 3]);
   const [hasUnsavedSettings, setHasUnsavedSettings] = useState(false);
 
   // Toast State
@@ -296,6 +297,55 @@ export default function App() {
   const handleModalClose = () => {
     setIsModalOpen(false);
     setEditingRound(null);
+  };
+
+  // Seat Editor Functions
+  const openSeatEditor = () => {
+    // Initialize with current player order (by seat/wind)
+    const currentOrder = [0, 1, 2, 3] as PlayerId[];
+    setEditingSeats(currentOrder);
+    setIsSeatEditorOpen(true);
+  };
+
+  const swapSeats = (index1: number, index2: number) => {
+    setEditingSeats(prev => {
+      const newOrder = [...prev];
+      [newOrder[index1], newOrder[index2]] = [newOrder[index2], newOrder[index1]];
+      return newOrder;
+    });
+  };
+
+  const handleSaveSeats = () => {
+    setSession(prev => {
+      const newPlayers = { ...prev.players };
+
+      // Create a mapping of new positions
+      const winds = [Wind.East, Wind.South, Wind.West, Wind.North];
+      const oldPlayers = { ...prev.players };
+
+      // Reassign players to new seats
+      editingSeats.forEach((playerId, seatIndex) => {
+        newPlayers[seatIndex as PlayerId] = {
+          ...oldPlayers[playerId],
+          id: seatIndex as PlayerId,
+          wind: winds[seatIndex]
+        };
+      });
+
+      // Update dealerId to match the new position of the current dealer
+      const oldDealerId = prev.dealerId;
+      const newDealerIndex = editingSeats.indexOf(oldDealerId);
+      const newDealerId = (newDealerIndex >= 0 ? newDealerIndex : 0) as PlayerId;
+
+      return {
+        ...prev,
+        players: newPlayers,
+        dealerId: newDealerId
+      };
+    });
+
+    setIsSeatEditorOpen(false);
+    showToastNotification('座位已更新');
   };
 
   const handleSaveSettings = () => {
@@ -524,13 +574,20 @@ export default function App() {
                 <div className="shrink-0 p-4 md:p-8 pb-4 md:pb-6 bg-slate-50/80 backdrop-blur-sm z-10">
                     <div className="max-w-6xl mx-auto w-full">
                         {/* Round Wind Indicator */}
-                        <div className="flex items-center justify-center gap-2 mb-4">
+                        <div className="flex items-center justify-center gap-3 mb-4">
                             <span className="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-bold">
                                 {ROUND_WIND_NAMES[session.roundWind][lang]}
                             </span>
                             <span className="text-slate-400 text-sm">
                                 {lang === 'zh-HK' ? `第 ${session.dealerCount + 1} 巡` : `Hand ${session.dealerCount + 1}`}
                             </span>
+                            <button
+                                onClick={openSeatEditor}
+                                className="ml-2 p-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-600 transition-colors"
+                                title={lang === 'zh-HK' ? '編輯座位' : 'Edit Seats'}
+                            >
+                                <Users size={14} />
+                            </button>
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                             {(Object.values(session.players) as Player[]).map(p => {
@@ -922,8 +979,99 @@ export default function App() {
         </div>
       )}
 
+      {/* Seat Editor Modal */}
+      {isSeatEditorOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setIsSeatEditorOpen(false)}>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-indigo-700 p-4 text-white flex items-center gap-2">
+              <Users size={20} />
+              <h2 className="text-lg font-bold">{lang === 'zh-HK' ? '編輯座位' : 'Edit Seats'}</h2>
+            </div>
+
+            <div className="p-4 space-y-3">
+              <p className="text-sm text-slate-500 mb-4">
+                {lang === 'zh-HK' ? '點擊玩家卡片交換座位位置' : 'Tap player cards to swap seat positions'}
+              </p>
+
+              {editingSeats.map((playerId, index) => {
+                const player = session.players[playerId];
+                const winds = [Wind.East, Wind.South, Wind.West, Wind.North];
+                const isDealer = playerId === session.dealerId;
+
+                return (
+                  <div key={index} className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold border border-indigo-200">
+                      {winds[index]}
+                    </div>
+                    <ArrowRight size={16} className="text-slate-300" />
+                    <button
+                      onClick={() => {
+                        // Swap with next position
+                        if (index < 3) {
+                          swapSeats(index, index + 1);
+                        } else {
+                          swapSeats(index, 0);
+                        }
+                      }}
+                      className={`flex-1 p-3 rounded-lg border text-left transition-all ${
+                        isDealer ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 hover:border-indigo-300 bg-white'
+                      }`}
+                    >
+                      <span className="font-bold text-slate-800">{player.name}</span>
+                      {isDealer && (
+                        <span className="ml-2 text-xs bg-indigo-600 text-white px-1.5 py-0.5 rounded">莊</span>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+
+              {/* Quick swap buttons */}
+              <div className="pt-4 border-t border-slate-100">
+                <p className="text-xs text-slate-400 mb-2">{lang === 'zh-HK' ? '快速調整' : 'Quick Adjust'}</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => swapSeats(0, 1)}
+                    className="flex-1 py-2 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                  >
+                    東↔南
+                  </button>
+                  <button
+                    onClick={() => swapSeats(1, 2)}
+                    className="flex-1 py-2 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                  >
+                    南↔西
+                  </button>
+                  <button
+                    onClick={() => swapSeats(2, 3)}
+                    className="flex-1 py-2 text-xs bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                  >
+                    西↔北
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 p-4 border-t border-slate-100">
+              <button
+                onClick={() => setIsSeatEditorOpen(false)}
+                className="flex-1 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                {t('cancel')}
+              </button>
+              <button
+                onClick={handleSaveSeats}
+                className="flex-1 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                {t('confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modals */}
-      <NewRoundModal 
+      <NewRoundModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
         players={session.players}
