@@ -858,11 +858,11 @@ export default function App() {
                         />
                     </div>
 
-                    {/* Horse (跑馬仔) Settings - Optimized card with smooth animations */}
-                    <div className={`mb-8 rounded-2xl transition-all duration-300 ${editingRules.horse?.enabled ? 'bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 border-2 border-amber-300 shadow-lg shadow-amber-100/50' : 'bg-white border border-slate-200 shadow-sm hover:border-amber-200'}`}>
-                      {/* Header - Always visible */}
+                    {/* Horse (跑馬仔) Settings - Touch-optimized responsive card */}
+                    <div className={`mb-6 md:mb-8 rounded-2xl md:rounded-3xl transition-all duration-300 ${editingRules.horse?.enabled ? 'bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 border-2 border-amber-300 shadow-lg shadow-amber-100/50' : 'bg-white border border-slate-200 shadow-sm hover:border-amber-200'}`}>
+                      {/* Header - Always visible, larger touch target */}
                       <div
-                        className="p-4 flex items-center justify-between cursor-pointer"
+                        className="p-4 md:p-5 flex items-center justify-between cursor-pointer active:bg-amber-50/50 md:active:bg-transparent transition-colors"
                         onClick={() => {
                           setEditingRules(prev => ({
                             ...prev,
@@ -871,24 +871,24 @@ export default function App() {
                           setHasUnsavedSettings(true);
                         }}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-xl transition-all duration-300 ${editingRules.horse?.enabled ? 'bg-amber-400 text-white shadow-md shadow-amber-300/50' : 'bg-slate-100 text-slate-400'}`}>
-                            <Sparkles size={20} />
+                        <div className="flex items-center gap-3 md:gap-4">
+                          <div className={`p-2.5 md:p-3 rounded-xl md:rounded-2xl transition-all duration-300 ${editingRules.horse?.enabled ? 'bg-amber-400 text-white shadow-lg shadow-amber-300/50' : 'bg-slate-100 text-slate-400'}`}>
+                            <Sparkles size={22} className="md:w-6 md:h-6" />
                           </div>
                           <div>
-                            <div className={`font-bold transition-colors duration-300 ${editingRules.horse?.enabled ? 'text-amber-900' : 'text-slate-700'}`}>
+                            <div className={`font-bold text-base md:text-lg transition-colors duration-300 ${editingRules.horse?.enabled ? 'text-amber-900' : 'text-slate-700'}`}>
                               {t('horseEnabled')}
                             </div>
-                            <div className={`text-xs transition-colors duration-300 ${editingRules.horse?.enabled ? 'text-amber-600' : 'text-slate-400'}`}>
+                            <div className={`text-xs md:text-sm transition-colors duration-300 ${editingRules.horse?.enabled ? 'text-amber-600' : 'text-slate-400'}`}>
                               {editingRules.horse?.enabled
                                 ? (lang === 'zh-HK' ? `${editingRules.horse.horseCount} 馬 · 每馬 ${editingRules.horse.perHorseValue} 底` : `${editingRules.horse.horseCount} horses · ${editingRules.horse.perHorseValue} unit each`)
                                 : (lang === 'zh-HK' ? '點擊啟用跑馬仔' : 'Tap to enable horses')}
                             </div>
                           </div>
                         </div>
-                        {/* Toggle Switch */}
+                        {/* Toggle Switch - Larger for touch */}
                         <div
-                          className={`w-14 h-8 rounded-full transition-all duration-300 ${editingRules.horse?.enabled ? 'bg-amber-500 shadow-md shadow-amber-300/50' : 'bg-slate-200'}`}
+                          className={`w-16 h-9 md:w-14 md:h-8 rounded-full transition-all duration-300 ${editingRules.horse?.enabled ? 'bg-amber-500 shadow-lg shadow-amber-300/50' : 'bg-slate-200'}`}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <button
@@ -901,20 +901,20 @@ export default function App() {
                             }}
                             className="w-full h-full"
                           >
-                            <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 ${editingRules.horse?.enabled ? 'translate-x-7' : 'translate-x-1'}`} />
+                            <div className={`w-7 h-7 md:w-6 md:h-6 bg-white rounded-full shadow-lg transition-all duration-300 mt-1 ${editingRules.horse?.enabled ? 'translate-x-8 md:translate-x-7' : 'translate-x-1'}`} />
                           </button>
                         </div>
                       </div>
 
                       {/* Expandable Content */}
                       {editingRules.horse?.enabled && (
-                        <div className="px-4 pb-4 animate-[slideDown_0.3s_ease-out]">
-                          <div className="pt-4 border-t border-amber-200/50 space-y-5">
-                            {/* Row 1: Horse Count & Per Horse Value */}
-                            <div className="grid grid-cols-2 gap-4 animate-[slideIn_0.3s_ease-out_0.05s_both]">
+                        <div className="px-4 pb-4 md:px-5 md:pb-5 animate-[slideDown_0.3s_ease-out]">
+                          <div className="pt-4 md:pt-5 border-t border-amber-200/50 space-y-5 md:space-y-6">
+                            {/* Row 1: Horse Count & Per Horse Value - Full width on mobile */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 animate-[slideIn_0.3s_ease-out_0.05s_both]">
                               <div>
-                                <label className="text-xs font-semibold text-amber-700 block mb-1.5">{t('horseCount')}</label>
-                                <div className="flex items-center gap-2">
+                                <label className="text-xs md:text-sm font-semibold text-amber-700 block mb-2">{t('horseCount')}</label>
+                                <div className="flex items-center gap-2 md:gap-3">
                                   <button
                                     onClick={() => {
                                       const newCount = Math.max(1, (editingRules.horse?.horseCount || 4) - 1);
@@ -924,7 +924,7 @@ export default function App() {
                                       }));
                                       setHasUnsavedSettings(true);
                                     }}
-                                    className="w-10 h-10 rounded-xl bg-white border border-amber-200 text-amber-600 font-bold text-lg hover:bg-amber-50 active:scale-95 transition-all"
+                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-white border-2 border-amber-200 text-amber-600 font-bold text-xl md:text-lg hover:bg-amber-50 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
                                   >−</button>
                                   <input
                                     type="number"
@@ -938,7 +938,7 @@ export default function App() {
                                       }));
                                       setHasUnsavedSettings(true);
                                     }}
-                                    className="flex-1 h-10 bg-white text-amber-900 border border-amber-200 rounded-xl text-center font-bold text-lg focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none"
+                                    className="flex-1 h-12 md:h-11 bg-white text-amber-900 border-2 border-amber-200 rounded-xl text-center font-bold text-xl md:text-lg focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none"
                                   />
                                   <button
                                     onClick={() => {
@@ -949,13 +949,13 @@ export default function App() {
                                       }));
                                       setHasUnsavedSettings(true);
                                     }}
-                                    className="w-10 h-10 rounded-xl bg-white border border-amber-200 text-amber-600 font-bold text-lg hover:bg-amber-50 active:scale-95 transition-all"
+                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-white border-2 border-amber-200 text-amber-600 font-bold text-xl md:text-lg hover:bg-amber-50 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
                                   >+</button>
                                 </div>
                               </div>
                               <div>
-                                <label className="text-xs font-semibold text-amber-700 block mb-1.5">{t('perHorseValue')} ({lang === 'zh-HK' ? '底' : 'unit'})</label>
-                                <div className="flex items-center gap-2">
+                                <label className="text-xs md:text-sm font-semibold text-amber-700 block mb-2">{t('perHorseValue')} ({lang === 'zh-HK' ? '底' : 'unit'})</label>
+                                <div className="flex items-center gap-2 md:gap-3">
                                   <button
                                     onClick={() => {
                                       const newVal = Math.max(0.5, (editingRules.horse?.perHorseValue || 1) - 0.5);
@@ -965,7 +965,7 @@ export default function App() {
                                       }));
                                       setHasUnsavedSettings(true);
                                     }}
-                                    className="w-10 h-10 rounded-xl bg-white border border-amber-200 text-amber-600 font-bold text-lg hover:bg-amber-50 active:scale-95 transition-all"
+                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-white border-2 border-amber-200 text-amber-600 font-bold text-xl md:text-lg hover:bg-amber-50 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
                                   >−</button>
                                   <input
                                     type="number"
@@ -979,7 +979,7 @@ export default function App() {
                                       }));
                                       setHasUnsavedSettings(true);
                                     }}
-                                    className="flex-1 h-10 bg-white text-amber-900 border border-amber-200 rounded-xl text-center font-bold text-lg focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none"
+                                    className="flex-1 h-12 md:h-11 bg-white text-amber-900 border-2 border-amber-200 rounded-xl text-center font-bold text-xl md:text-lg focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none"
                                   />
                                   <button
                                     onClick={() => {
@@ -990,16 +990,16 @@ export default function App() {
                                       }));
                                       setHasUnsavedSettings(true);
                                     }}
-                                    className="w-10 h-10 rounded-xl bg-white border border-amber-200 text-amber-600 font-bold text-lg hover:bg-amber-50 active:scale-95 transition-all"
+                                    className="w-12 h-12 md:w-11 md:h-11 rounded-xl bg-white border-2 border-amber-200 text-amber-600 font-bold text-xl md:text-lg hover:bg-amber-50 active:scale-90 md:active:scale-95 transition-all touch-manipulation"
                                   >+</button>
                                 </div>
                               </div>
                             </div>
 
-                            {/* Payout Mode */}
+                            {/* Payout Mode - Larger buttons for touch */}
                             <div className="animate-[slideIn_0.3s_ease-out_0.1s_both]">
-                              <label className="text-xs font-semibold text-amber-700 block mb-2">{t('horsePayoutMode')}</label>
-                              <div className="grid grid-cols-3 gap-2">
+                              <label className="text-xs md:text-sm font-semibold text-amber-700 block mb-2 md:mb-3">{t('horsePayoutMode')}</label>
+                              <div className="grid grid-cols-3 gap-2 md:gap-3">
                                 {(['ADD_UNITS', 'ADD_FAAN', 'MULTIPLIER'] as const).map((mode) => (
                                   <button
                                     key={mode}
@@ -1010,10 +1010,10 @@ export default function App() {
                                       }));
                                       setHasUnsavedSettings(true);
                                     }}
-                                    className={`py-2.5 px-3 text-xs rounded-xl border font-semibold transition-all duration-200 ${
+                                    className={`py-3.5 md:py-3 px-2 md:px-3 text-sm md:text-xs rounded-xl border-2 font-semibold transition-all duration-200 touch-manipulation ${
                                       editingRules.horse?.payoutMode === mode
-                                        ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-200'
-                                        : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50 hover:border-amber-300 active:scale-95'
+                                        ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-200'
+                                        : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50 active:scale-90 md:active:scale-95'
                                     }`}
                                   >
                                     {t(mode === 'ADD_UNITS' ? 'addUnits' : mode === 'ADD_FAAN' ? 'addFaan' : 'multiplier')}
@@ -1024,8 +1024,8 @@ export default function App() {
 
                             {/* Liability */}
                             <div className="animate-[slideIn_0.3s_ease-out_0.15s_both]">
-                              <label className="text-xs font-semibold text-amber-700 block mb-2">{t('horseLiability')}</label>
-                              <div className="grid grid-cols-3 gap-2">
+                              <label className="text-xs md:text-sm font-semibold text-amber-700 block mb-2 md:mb-3">{t('horseLiability')}</label>
+                              <div className="grid grid-cols-3 gap-2 md:gap-3">
                                 {(['ALL_PAY', 'DISCARDER_PAYS', 'SPLIT_PAY'] as const).map((liability) => (
                                   <button
                                     key={liability}
@@ -1036,10 +1036,10 @@ export default function App() {
                                       }));
                                       setHasUnsavedSettings(true);
                                     }}
-                                    className={`py-2.5 px-3 text-xs rounded-xl border font-semibold transition-all duration-200 ${
+                                    className={`py-3.5 md:py-3 px-2 md:px-3 text-sm md:text-xs rounded-xl border-2 font-semibold transition-all duration-200 touch-manipulation ${
                                       editingRules.horse?.liability === liability
-                                        ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-200'
-                                        : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50 hover:border-amber-300 active:scale-95'
+                                        ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-200'
+                                        : 'bg-white text-amber-700 border-amber-200 hover:bg-amber-50 active:scale-90 md:active:scale-95'
                                     }`}
                                   >
                                     {t(liability === 'ALL_PAY' ? 'allPay' : liability === 'DISCARDER_PAYS' ? 'discarderPays' : 'splitPay')}
@@ -1048,11 +1048,11 @@ export default function App() {
                               </div>
                             </div>
 
-                            {/* Cap Applies - Compact inline style */}
-                            <div className="flex items-center justify-between pt-2 animate-[slideIn_0.3s_ease-out_0.2s_both]">
+                            {/* Cap Applies - Larger touch target */}
+                            <div className="flex items-center justify-between py-2 animate-[slideIn_0.3s_ease-out_0.2s_both]">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-semibold text-amber-700">{t('horseCapApplies')}</span>
-                                <span className="text-[10px] text-amber-500/70">({lang === 'zh-HK' ? '上限生效' : 'Cap applies'})</span>
+                                <span className="text-sm md:text-base font-semibold text-amber-700">{t('horseCapApplies')}</span>
+                                <span className="hidden sm:inline text-xs text-amber-500/70">({lang === 'zh-HK' ? '上限生效' : 'Cap applies'})</span>
                               </div>
                               <button
                                 onClick={() => {
@@ -1062,9 +1062,9 @@ export default function App() {
                                   }));
                                   setHasUnsavedSettings(true);
                                 }}
-                                className={`w-12 h-7 rounded-full transition-all duration-300 ${editingRules.horse?.capApplies ? 'bg-amber-500 shadow-md shadow-amber-300/50' : 'bg-amber-200'}`}
+                                className={`w-14 h-8 rounded-full transition-all duration-300 touch-manipulation ${editingRules.horse?.capApplies ? 'bg-amber-500 shadow-lg shadow-amber-300/50' : 'bg-amber-200'}`}
                               >
-                                <div className={`w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300 mt-1 ${editingRules.horse?.capApplies ? 'translate-x-6' : 'translate-x-1'}`} />
+                                <div className={`w-6 h-6 bg-white rounded-full shadow-lg transition-all duration-300 mt-1 ${editingRules.horse?.capApplies ? 'translate-x-7' : 'translate-x-1'}`} />
                               </button>
                             </div>
                           </div>
