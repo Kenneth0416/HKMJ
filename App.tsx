@@ -819,7 +819,7 @@ export default function App() {
                         />
                     </div>
 
-                    {/* Horse (跑馬仔) Settings - Improved visibility */}
+                    {/* Horse (跑馬仔) Settings - Improved visibility with animation */}
                     <div className="mb-8 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 p-6 rounded-2xl">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -850,9 +850,9 @@ export default function App() {
                       </div>
 
                       {editingRules.horse?.enabled && (
-                        <div className="space-y-6 pt-4 border-t border-amber-200/50">
+                        <div className="space-y-6 pt-4 border-t border-amber-200/50 transition-all duration-300 ease-in-out">
                           {/* Horse Count */}
-                          <div>
+                          <div className="opacity-100 transition-opacity duration-300 delay-100">
                             <label className="font-bold text-slate-700 block text-sm mb-2">{t('horseCount')}</label>
                             <input
                               type="number"
@@ -871,7 +871,7 @@ export default function App() {
                           </div>
 
                           {/* Per Horse Value */}
-                          <div>
+                          <div className="opacity-100 transition-opacity duration-300 delay-150">
                             <label className="font-bold text-slate-700 block text-sm mb-2">{t('perHorseValue')} ({lang === 'zh-HK' ? '底' : 'unit'})</label>
                             <input
                               type="number"
@@ -890,7 +890,7 @@ export default function App() {
                           </div>
 
                           {/* Payout Mode */}
-                          <div>
+                          <div className="opacity-100 transition-opacity duration-300 delay-200">
                             <label className="font-bold text-slate-700 block text-sm mb-2">{t('horsePayoutMode')}</label>
                             <div className="grid grid-cols-3 gap-2">
                               {(['ADD_UNITS', 'ADD_FAAN', 'MULTIPLIER'] as const).map((mode) => (
@@ -916,7 +916,7 @@ export default function App() {
                           </div>
 
                           {/* Liability */}
-                          <div>
+                          <div className="opacity-100 transition-opacity duration-300 delay-250">
                             <label className="font-bold text-slate-700 block text-sm mb-2">{t('horseLiability')}</label>
                             <div className="grid grid-cols-3 gap-2">
                               {(['ALL_PAY', 'DISCARDER_PAYS', 'SPLIT_PAY'] as const).map((liability) => (
@@ -942,7 +942,7 @@ export default function App() {
                           </div>
 
                           {/* Cap Applies */}
-                          <div className="flex items-center justify-between pt-2">
+                          <div className="flex items-center justify-between pt-2 opacity-100 transition-opacity duration-300 delay-300">
                             <span className="font-bold text-slate-700 text-sm">{t('horseCapApplies')}</span>
                             <button
                               onClick={() => {
