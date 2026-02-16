@@ -101,14 +101,14 @@ export const calculateRoundDeltas = (
     hasHorseBonus = true;
     switch (horseConfig.payoutMode) {
       case 'ADD_FAAN': {
-        // 加番模式：馬直接加到番數上
+        // 加番模式：馬直接加到番數上，馬獎已體現在番數增加中
         let newFaan = rawFaan + (horseHits * horseConfig.perHorseValue);
         if (horseConfig.capApplies) {
           newFaan = Math.min(newFaan, rules.maxFaan);
         }
         effectiveFaan = newFaan;
-        const newBaseValue = calculateBaseValue(effectiveFaan, rules.unitPrice);
-        horseBonusPerPlayer = newBaseValue - originalBaseValue;
+        // 馬獎已體現在 effectiveFaan 增加導致的 baseValue 增加中，不需要額外計算
+        horseBonusPerPlayer = 0;
         break;
       }
       case 'MULTIPLIER': {
