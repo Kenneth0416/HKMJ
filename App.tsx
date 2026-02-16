@@ -15,6 +15,24 @@ import { Capacitor } from '@capacitor/core';
 // Check if running on native platform
 const isNative = Capacitor.isNativePlatform();
 
+// Animation keyframes for horse settings
+const animationStyles = `
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+`;
+
 // --- Toast Notification Component ---
 
 type ToastType = 'success' | 'delete' | 'edit' | 'info';
@@ -68,6 +86,14 @@ const NavItem = ({ active, onClick, icon: Icon, label, className = '' }: any) =>
 export default function App() {
   // --- State ---
   const [view, setView] = useState<'HOME' | 'GAME'>('HOME');
+
+  // Inject animation keyframes
+  useEffect(() => {
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = animationStyles;
+    document.head.appendChild(styleSheet);
+    return () => { document.head.removeChild(styleSheet); };
+  }, []);
 
   // --- Native platform optimizations ---
   useEffect(() => {
@@ -850,9 +876,9 @@ export default function App() {
                       </div>
 
                       {editingRules.horse?.enabled && (
-                        <div className="space-y-6 pt-4 border-t border-amber-200/50 transition-all duration-300 ease-in-out">
+                        <div className="space-y-6 pt-4 border-t border-amber-200/50 animate-[fadeIn_0.3s_ease-in-out]">
                           {/* Horse Count */}
-                          <div className="opacity-100 transition-opacity duration-300 delay-100">
+                          <div className="animate-[slideIn_0.3s_ease-in-out_0.05s_both]">
                             <label className="font-bold text-slate-700 block text-sm mb-2">{t('horseCount')}</label>
                             <input
                               type="number"
@@ -871,7 +897,7 @@ export default function App() {
                           </div>
 
                           {/* Per Horse Value */}
-                          <div className="opacity-100 transition-opacity duration-300 delay-150">
+                          <div className="animate-[slideIn_0.3s_ease-in-out_0.1s_both]">
                             <label className="font-bold text-slate-700 block text-sm mb-2">{t('perHorseValue')} ({lang === 'zh-HK' ? '底' : 'unit'})</label>
                             <input
                               type="number"
@@ -890,7 +916,7 @@ export default function App() {
                           </div>
 
                           {/* Payout Mode */}
-                          <div className="opacity-100 transition-opacity duration-300 delay-200">
+                          <div className="animate-[slideIn_0.3s_ease-in-out_0.15s_both]">
                             <label className="font-bold text-slate-700 block text-sm mb-2">{t('horsePayoutMode')}</label>
                             <div className="grid grid-cols-3 gap-2">
                               {(['ADD_UNITS', 'ADD_FAAN', 'MULTIPLIER'] as const).map((mode) => (
@@ -916,7 +942,7 @@ export default function App() {
                           </div>
 
                           {/* Liability */}
-                          <div className="opacity-100 transition-opacity duration-300 delay-250">
+                          <div className="animate-[slideIn_0.3s_ease-in-out_0.2s_both]">
                             <label className="font-bold text-slate-700 block text-sm mb-2">{t('horseLiability')}</label>
                             <div className="grid grid-cols-3 gap-2">
                               {(['ALL_PAY', 'DISCARDER_PAYS', 'SPLIT_PAY'] as const).map((liability) => (
@@ -942,7 +968,7 @@ export default function App() {
                           </div>
 
                           {/* Cap Applies */}
-                          <div className="flex items-center justify-between pt-2 opacity-100 transition-opacity duration-300 delay-300">
+                          <div className="flex items-center justify-between pt-2 animate-[slideIn_0.3s_ease-in-out_0.25s_both]">
                             <span className="font-bold text-slate-700 text-sm">{t('horseCapApplies')}</span>
                             <button
                               onClick={() => {
