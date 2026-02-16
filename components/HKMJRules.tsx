@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scroll, Info, BookOpen, Sigma } from 'lucide-react';
+import { Scroll, Info, BookOpen, Sigma, Sparkles } from 'lucide-react';
 import MahjongTile, { TileType, TileValue } from './MahjongTile';
 
 interface HKMJRulesProps {
@@ -209,6 +209,56 @@ const HKMJRules: React.FC<HKMJRulesProps> = ({ t, onClose, className = '' }) => 
                     </ul>
                 </div>
 
+            </div>
+        </div>
+
+        {/* Horse (跑馬仔) Rules */}
+        <div>
+             <h4 className="font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2 flex items-center gap-2">
+                <Sparkles size={18} className="text-amber-500" />
+                {t('horseRulesTitle')}
+            </h4>
+
+            <p className="text-sm text-slate-600 leading-relaxed mb-4 bg-amber-50 p-3 rounded-lg border border-amber-100">
+                {t('horseRulesDesc')}
+            </p>
+
+            {/* Payout Modes */}
+            <div className="mb-4">
+                <div className="text-sm font-semibold text-slate-700 mb-2">{t('horsePayoutModes')}</div>
+                <div className="space-y-2">
+                    <div className="flex items-start gap-3 bg-slate-50 p-2 rounded-lg">
+                        <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold shrink-0">{t('addFaan')}</span>
+                        <span className="text-xs text-slate-600">{t('horseModeAddFaanDesc')}</span>
+                    </div>
+                    <div className="flex items-start gap-3 bg-slate-50 p-2 rounded-lg">
+                        <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs font-bold shrink-0">{t('multiplier')}</span>
+                        <span className="text-xs text-slate-600">{t('horseModeMultiplierDesc')}</span>
+                    </div>
+                    <div className="flex items-start gap-3 bg-slate-50 p-2 rounded-lg">
+                        <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold shrink-0">{t('addUnits')}</span>
+                        <span className="text-xs text-slate-600">{t('horseModeAddUnitsDesc')}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Liability Modes */}
+            <div>
+                <div className="text-sm font-semibold text-slate-700 mb-2">{t('horseLiabilityModes')}</div>
+                <div className="space-y-2 text-xs text-slate-600">
+                    <div className="flex items-start gap-2">
+                        <span className="text-emerald-600 font-bold">•</span>
+                        <span><strong>{t('allPay')}</strong> — {t('horseLiabilityAllPayDesc')}</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                        <span className="text-emerald-600 font-bold">•</span>
+                        <span><strong>{t('splitPay')}</strong> — {t('horseLiabilitySplitPayDesc')}</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                        <span className="text-emerald-600 font-bold">•</span>
+                        <span><strong>{t('discarderPays')}</strong> — {t('horseLiabilityDiscarderPaysDesc')}</span>
+                    </div>
+                </div>
             </div>
         </div>
 

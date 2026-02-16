@@ -173,37 +173,42 @@ export const calculateRoundDeltas = (
     deltas[winnerId] = totalWin;
 
   } else if (winType === WinType.Discard && loserId !== null) {
+    // 出衄時：base 由出衄者付
     const loserPays = -finalBaseValue;
 
-    // Add horse bonus based on liability (for non-ADD_FAAN modes)
+    // 馬獎根據 liability 分配
     if (horseBonusPerPlayer > 0 && horseConfig && horseConfig.payoutMode !== 'ADD_FAAN') {
       switch (horseConfig.liability) {
         case 'ALL_PAY':
-          // 三家付：三家各付完整一份（baseValue + 馬獎）
+          // 三家付：base 由出衄者付，馬獎由三家（不包括胡家）各付一份
+          // 出衄者：付 base + 馬獎
+          // 其他兩家：各付馬獎
+          deltas[loserId] = loserPays - finalHorseBonus;
           ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
-            if (pid !== winnerId) {
-              // 每家都付 baseValue + 馬獎
-              deltas[pid] = -(finalBaseValue + finalHorseBonus);
+            if (pid !== winnerId && pid !== loserId) {
+              deltas[pid] = -finalHorseBonus;
             }
           });
-          // 胡家收 3 × (baseValue + 馬獎)
-          deltas[winnerId] = (finalBaseValue + finalHorseBonus) * 3;
+          // 胡家收 base + 3 × 馬獎
+          deltas[winnerId] = finalBaseValue + finalHorseBonus * 3;
           return deltas as Record<PlayerId, number>;
 
         case 'DISCARDER_PAYS':
-          // 出銃者付：出銃者包晒（baseValue + 3 × 馬獎）
+          // 出衄者包晒：出衄者付 base + 3 × 馬獎
           deltas[loserId] = loserPays - finalHorseBonus * 3;
           deltas[winnerId] = -deltas[loserId];
           return deltas as Record<PlayerId, number>;
 
         case 'SPLIT_PAY':
-          // 分攤：馬獎總額除3，出銃者付 baseValue
+          // 分攤：馬獎總額由三家平分，出衄者另付 base
+          // 每家（包括出衄者）付 馬獎/3，出衄者額外付 base
+          const horseShare = finalHorseBonus / 3;
           ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
             if (pid !== winnerId) {
               if (pid === loserId) {
-                deltas[pid] = loserPays - finalHorseBonus / 3;
+                deltas[pid] = loserPays - horseShare;
               } else {
-                deltas[pid] = -finalHorseBonus / 3;
+                deltas[pid] = -horseShare;
               }
             }
           });
@@ -212,7 +217,7 @@ export const calculateRoundDeltas = (
       }
     }
 
-    // No horse bonus or ADD_FAAN mode (bonus already in baseValue)
+    // 沒有馬獎或 ADD_FAAN 模式（馬獎已計入番數）
     deltas[loserId] = loserPays;
     deltas[winnerId] = finalBaseValue;
   }

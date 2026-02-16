@@ -123,6 +123,17 @@ export const translations = {
     splitPay: '分攤',
     horseHitsLabel: '中 {n} 馬',
     horseBonus: '馬獎',
+    // Horse Rules (for rules modal)
+    horseRulesTitle: '跑馬仔規則',
+    horseRulesDesc: '跑馬仔係香港麻將嘅特色玩法。開局後會隨機抽出 N 隻「馬牌」，食糊時比對手中幾多隻馬，再按設定計算額外獎勵。',
+    horsePayoutModes: '計算方式',
+    horseModeAddFaanDesc: '每中一馬加 N 番。例：3 番食糊、中 2 馬（每馬 1 番）= 5 番',
+    horseModeMultiplierDesc: '每中一馬贏 N 倍。例：中 2 馬（每馬 1 倍）= 總籌碼 × 2',
+    horseModeAddUnitsDesc: '每中一馬加 N 底（固定金額）。例：中 2 馬、每馬 1 底 = 額外 2 底',
+    horseLiabilityModes: '責任分派（出銃時）',
+    horseLiabilityAllPayDesc: '三家各付一份馬獎（出銃者另付底分）',
+    horseLiabilitySplitPayDesc: '馬獎總額由三家平分',
+    horseLiabilityDiscarderPaysDesc: '出銃者包晒所有馬獎',
   },
   'en': {
     appTitle: 'HKMJ Scorer',
@@ -246,6 +257,17 @@ export const translations = {
     splitPay: 'Split Pay',
     horseHitsLabel: '{n} Horse(s)',
     horseBonus: 'Horse Bonus',
+    // Horse Rules (for rules modal)
+    horseRulesTitle: 'Horse (跑馬仔) Rules',
+    horseRulesDesc: 'Horse is a unique HKMJ feature. After dealing, N random "horse tiles" are drawn. When you win, compare your hand to the horse tiles and earn bonus chips based on settings.',
+    horsePayoutModes: 'Payout Modes',
+    horseModeAddFaanDesc: 'Each hit adds N faan. E.g., 3 faan win + 2 horse hits (1 faan each) = 5 faan',
+    horseModeMultiplierDesc: 'Each hit multiplies by N. E.g., 2 hits (1× each) = Total chips × 2',
+    horseModeAddUnitsDesc: 'Each hit adds N units (fixed amount). E.g., 2 hits × 1 unit = Extra 2 units',
+    horseLiabilityModes: 'Liability (on discard)',
+    horseLiabilityAllPayDesc: 'All 3 players pay horse bonus (discarder pays base separately)',
+    horseLiabilitySplitPayDesc: 'Total horse bonus split among 3 players',
+    horseLiabilityDiscarderPaysDesc: 'Discarder pays all horse bonus',
   }
 };
 
