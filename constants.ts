@@ -31,7 +31,7 @@ export const DEFAULT_RULES: RuleConfig = {
   unitPrice: 1,
   presetId: 0, // Default to "Standard ($1)"
   horse: DEFAULT_HORSE_CONFIG,
-  windFollowsDealer: false // 預設門風固定，不跟隨莊家
+  windFollowsDealer: true // 預設門風跟隨莊家轉（莊家永遠是東位）
 };
 
 export const SCORING_PRESETS = [

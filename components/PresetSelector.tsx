@@ -17,32 +17,45 @@ interface PresetSelectorProps {
 }
 
 const presetAnimationStyles = `
-@keyframes dropdownEnter {
+@keyframes accordionExpand {
   from {
     opacity: 0;
-    transform: translateY(-8px) scale(0.95);
+    max-height: 0;
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    max-height: 256px;
   }
 }
-@keyframes itemSlideIn {
+@keyframes accordionCollapse {
+  from {
+    opacity: 1;
+    max-height: 256px;
+  }
+  to {
+    opacity: 0;
+    max-height: 0;
+  }
+}
+@keyframes itemFadeIn {
   from {
     opacity: 0;
-    transform: translateX(-8px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
-.preset-dropdown {
-  animation: dropdownEnter 0.2s ease-out forwards;
+.preset-accordion-open {
+  animation: accordionExpand 0.25s ease-out forwards;
 }
-.preset-item {
+.preset-accordion-close {
+  animation: accordionCollapse 0.2s ease-in forwards;
+}
+.preset-item-animate {
   opacity: 0;
-  animation: itemSlideIn 0.2s ease-out forwards;
+  animation: itemFadeIn 0.2s ease-out forwards;
 }
 `;
 
