@@ -166,89 +166,46 @@ export const calculateRoundDeltas = (
     deltas[winnerId] = totalWin;
 
   } else if (winType === WinType.Discard && loserId !== null) {
-    // Winner gets from Loser
-    if (rules.discarderPaysAll) {
-      // "Baau" - Shooter pays for all 3 players' potential loss
-      // Winner gets 3x Base (equivalent to Self-Draw total).
-      const totalWin = finalValue * 3;
-      let loserPays = -totalWin;
+    // Winner gets from Loser (出衖者付 1 份)
+    const totalWin = finalValue;
+    let loserPays = -totalWin;
 
-      // Horse bonus for discard
-      if (horseBonusValue > 0 && horseConfig) {
-        switch (horseConfig.liability) {
-          case 'ALL_PAY':
-            // All three players split the horse bonus
-            // Winner gets horse bonus from all, discarder pays their share
-            const allPayHorseBonus = finalHorseBonus;
-            loserPays = -totalWin - allPayHorseBonus; // Discarder pays main + horse
-            // Others also pay their share of horse bonus
-            ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
-              if (pid !== winnerId && pid !== loserId) {
-                deltas[pid] = -finalHorseBonus / 3;
-              }
-            });
-            deltas[loserId] = loserPays;
-            deltas[winnerId] = totalWin + finalHorseBonus;
-            return deltas as Record<PlayerId, number>;
+    // Horse bonus for discard
+    if (horseBonusValue > 0 && horseConfig) {
+      switch (horseConfig.liability) {
+        case 'ALL_PAY':
+          // All three non-winners split the horse bonus
+          ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
+            if (pid !== winnerId && pid !== loserId) {
+              deltas[pid] = -finalHorseBonus / 3;
+            }
+          });
+          loserPays = -totalWin - finalHorseBonus / 3;
+          deltas[loserId] = loserPays;
+          deltas[winnerId] = totalWin + finalHorseBonus;
+          return deltas as Record<PlayerId, number>;
 
-          case 'DISCARDER_PAYS':
-            // Discarder pays everything including horse bonus
-            loserPays = -(totalWin + finalHorseBonus);
-            break;
+        case 'DISCARDER_PAYS':
+          // Discarder pays everything including horse bonus
+          loserPays = -(totalWin + finalHorseBonus);
+          break;
 
-          case 'SPLIT_PAY':
-            // Horse bonus split among all non-winners
-            loserPays = -(totalWin + finalHorseBonus * 2/3);
-            ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
-              if (pid !== winnerId && pid !== loserId) {
-                deltas[pid] = -finalHorseBonus / 3;
-              }
-            });
-            deltas[loserId] = loserPays;
-            deltas[winnerId] = totalWin + finalHorseBonus;
-            return deltas as Record<PlayerId, number>;
-        }
+        case 'SPLIT_PAY':
+          // Horse bonus split among all non-winners
+          ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
+            if (pid !== winnerId && pid !== loserId) {
+              deltas[pid] = -finalHorseBonus / 3;
+            }
+          });
+          loserPays = -(totalWin + finalHorseBonus / 3);
+          deltas[loserId] = loserPays;
+          deltas[winnerId] = totalWin + finalHorseBonus;
+          return deltas as Record<PlayerId, number>;
       }
-
-      deltas[loserId] = loserPays;
-      deltas[winnerId] = -loserPays;
-    } else {
-      // "Half Pay" or Chicken style: Shooter pays, others pay nothing.
-      // Typically "Discard" win is treated as 1x.
-      const factor = 1;
-      const totalWin = finalValue * factor;
-
-      let loserPays = -totalWin;
-
-      // Horse bonus for discard (non-paysAll mode)
-      if (horseBonusValue > 0 && horseConfig) {
-        switch (horseConfig.liability) {
-          case 'ALL_PAY':
-            // All non-winners pay horse bonus equally
-            loserPays -= finalHorseBonus / 3;
-            ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
-              if (pid !== winnerId && pid !== loserId) {
-                deltas[pid] = -finalHorseBonus / 3;
-              }
-            });
-            break;
-          case 'DISCARDER_PAYS':
-            loserPays -= finalHorseBonus;
-            break;
-          case 'SPLIT_PAY':
-            loserPays -= finalHorseBonus / 3;
-            ([0, 1, 2, 3] as PlayerId[]).forEach((pid) => {
-              if (pid !== winnerId && pid !== loserId) {
-                deltas[pid] = -finalHorseBonus / 3;
-              }
-            });
-            break;
-        }
-      }
-
-      deltas[loserId] = loserPays;
-      deltas[winnerId] = totalWin + (horseBonusValue > 0 ? finalHorseBonus : 0);
     }
+
+    deltas[loserId] = loserPays;
+    deltas[winnerId] = -loserPays;
   }
 
   return deltas as Record<PlayerId, number>;
