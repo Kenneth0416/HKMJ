@@ -92,36 +92,33 @@ export const calculateRoundDeltas = (
 
   // 3. Calculate horse bonus if enabled
   const horseConfig = rules.horse;
-  let horseBonusPerPlayer = 0;  // 每家額外付的馬獎
-  let hasHorseBonus = false;  // 是否有馬獎（包括加番模式的額外價值）
+  let horseBonusPerPlayer = 0;  // 每家額外付的馬獎（不包括 ADD_FAAN 模式）
+  let hasHorseBonus = false;  // 是否有馬獎需要分配
 
   if (horseConfig?.enabled && horseHits && horseHits > 0) {
-    hasHorseBonus = true;
     switch (horseConfig.payoutMode) {
       case 'ADD_FAAN': {
-        // 加番模式：馬直接加到番數上
-        // 計算原番數的價值和新番數的價值差額，這差額就是「馬獎」
+        // 加番模式：馬直接加到番數上，baseValue 會自然增加
+        // 不需要額外計算馬獎，因為已體現在番數增加上
         let newFaan = rawFaan + (horseHits * horseConfig.perHorseValue);
         if (horseConfig.capApplies) {
           newFaan = Math.min(newFaan, rules.maxFaan);
         }
         effectiveFaan = newFaan;
-        // 計算因加番而增加的價值（作為馬獎）
-        const newBaseValue = calculateBaseValue(effectiveFaan, rules.unitPrice);
-        horseBonusPerPlayer = newBaseValue - originalBaseValue;
+        // ADD_FAAN 模式下不設 hasHorseBonus，因為不需要額外分配
         break;
       }
       case 'MULTIPLIER': {
         // 倍數模式：每中一馬翻 N 倍
-        // 例如 perHorseValue = 2，horseHits = 1，則 base * 2
-        // perHorseValue = 2，horseHits = 2，則 base * 4
         const multiplier = Math.pow(horseConfig.perHorseValue, horseHits);
         horseBonusPerPlayer = originalBaseValue * (multiplier - 1);
+        hasHorseBonus = true;
         break;
       }
       case 'ADD_UNITS': {
         // 加籌碼模式：每中一馬加 N 底
         horseBonusPerPlayer = horseConfig.perHorseValue * horseHits * rules.unitPrice;
+        hasHorseBonus = true;
         break;
       }
     }
