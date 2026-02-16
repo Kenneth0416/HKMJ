@@ -56,6 +56,7 @@ const StepperInput: React.FC<StepperInputProps> = ({
   // Internal state for handling typing - allows empty string during input
   const [inputValue, setInputValue] = useState<string>(String(value ?? ''));
   const isFocusedRef = useRef(false);
+  const valueOnFocusRef = useRef<number>(value); // Remember value when focused
 
   // Sync external value to internal state when not focused
   useEffect(() => {
@@ -114,6 +115,8 @@ const StepperInput: React.FC<StepperInputProps> = ({
 
   const handleFocus = () => {
     isFocusedRef.current = true;
+    // Remember the current value before editing
+    valueOnFocusRef.current = value;
     // Select all text on focus for easy replacement
     const input = document.activeElement as HTMLInputElement;
     if (input) {
@@ -124,10 +127,11 @@ const StepperInput: React.FC<StepperInputProps> = ({
   const handleBlur = () => {
     isFocusedRef.current = false;
 
-    // Restore default on blur if empty or invalid
+    // Restore to value before focus if empty or invalid
     const parsed = parseValue(inputValue);
     if (parsed === null || parsed < min) {
-      const restoreVal = defaultValue ?? min;
+      // Restore the original value from when focus started
+      const restoreVal = valueOnFocusRef.current;
       onChange(restoreVal);
       setInputValue(String(restoreVal));
     } else if (parsed > max) {
