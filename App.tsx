@@ -819,159 +819,146 @@ export default function App() {
                         />
                     </div>
 
-                    {/* Horse (跑馬仔) Settings */}
-                    <div className="mb-8">
+                    {/* Horse (跑馬仔) Settings - Improved visibility */}
+                    <div className="mb-8 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 p-6 rounded-2xl">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-1.5 bg-amber-100 rounded-lg text-amber-600 border border-amber-200">
+                            <Sparkles size={18} />
+                          </div>
+                          <div>
+                            <div className="font-bold text-amber-900">{t('horseEnabled')}</div>
+                            <div className="text-xs text-amber-600">
+                              {editingRules.horse?.enabled
+                                ? (lang === 'zh-HK' ? `已啟用 · ${editingRules.horse.horseCount} 馬` : `Enabled · ${editingRules.horse.horseCount} horses`)
+                                : (lang === 'zh-HK' ? '未啟用' : 'Disabled')}
+                            </div>
+                          </div>
+                        </div>
                         <button
-                          onClick={() => setIsHorseSettingsOpen(!isHorseSettingsOpen)}
-                          className="w-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between hover:from-amber-100 hover:to-orange-100 transition-colors"
+                          onClick={() => {
+                            setEditingRules(prev => ({
+                              ...prev,
+                              horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, enabled: !prev.horse?.enabled }
+                            }));
+                            setHasUnsavedSettings(true);
+                          }}
+                          className={`w-14 h-8 rounded-full transition-colors ${editingRules.horse?.enabled ? 'bg-amber-500' : 'bg-slate-200'}`}
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="p-1.5 bg-amber-100 rounded-lg text-amber-600 border border-amber-200">
-                              <Sparkles size={18} />
-                            </div>
-                            <div className="text-left">
-                              <div className="font-bold text-amber-900">{t('horseEnabled')}</div>
-                              <div className="text-xs text-amber-600">
-                                {editingRules.horse?.enabled
-                                  ? (lang === 'zh-HK' ? `已啟用 · ${editingRules.horse.horseCount} 馬` : `Enabled · ${editingRules.horse.horseCount} horses`)
-                                  : (lang === 'zh-HK' ? '未啟用' : 'Disabled')}
-                              </div>
-                            </div>
-                          </div>
-                          {isHorseSettingsOpen ? <ChevronUp size={20} className="text-amber-600" /> : <ChevronDown size={20} className="text-amber-600" />}
+                          <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform ${editingRules.horse?.enabled ? 'translate-x-7' : 'translate-x-1'}`} />
                         </button>
+                      </div>
 
-                        {isHorseSettingsOpen && (
-                          <div className="mt-4 bg-white p-6 rounded-2xl border border-amber-100 shadow-sm space-y-6">
-                            {/* Enable Toggle */}
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-slate-700">{t('horseEnabled')}</span>
-                              <button
-                                onClick={() => {
-                                  setEditingRules(prev => ({
-                                    ...prev,
-                                    horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, enabled: !prev.horse?.enabled }
-                                  }));
-                                  setHasUnsavedSettings(true);
-                                }}
-                                className={`w-14 h-8 rounded-full transition-colors ${editingRules.horse?.enabled ? 'bg-amber-500' : 'bg-slate-200'}`}
-                              >
-                                <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform ${editingRules.horse?.enabled ? 'translate-x-7' : 'translate-x-1'}`} />
-                              </button>
-                            </div>
-
-                            {editingRules.horse?.enabled && (
-                              <>
-                                {/* Horse Count */}
-                                <div>
-                                  <label className="font-bold text-slate-700 block text-sm mb-2">{t('horseCount')}</label>
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max="13"
-                                    value={editingRules.horse?.horseCount || 4}
-                                    onChange={(e) => {
-                                      setEditingRules(prev => ({
-                                        ...prev,
-                                        horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: parseInt(e.target.value) || 4 }
-                                      }));
-                                      setHasUnsavedSettings(true);
-                                    }}
-                                    className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl p-3 text-center font-bold text-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-100 outline-none"
-                                  />
-                                </div>
-
-                                {/* Per Horse Value */}
-                                <div>
-                                  <label className="font-bold text-slate-700 block text-sm mb-2">{t('perHorseValue')} ({lang === 'zh-HK' ? '底' : 'unit'})</label>
-                                  <input
-                                    type="number"
-                                    min="0.5"
-                                    step="0.5"
-                                    value={editingRules.horse?.perHorseValue || 1}
-                                    onChange={(e) => {
-                                      setEditingRules(prev => ({
-                                        ...prev,
-                                        horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: parseFloat(e.target.value) || 1 }
-                                      }));
-                                      setHasUnsavedSettings(true);
-                                    }}
-                                    className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl p-3 text-center font-bold text-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-100 outline-none"
-                                  />
-                                </div>
-
-                                {/* Payout Mode */}
-                                <div>
-                                  <label className="font-bold text-slate-700 block text-sm mb-2">{t('horsePayoutMode')}</label>
-                                  <div className="grid grid-cols-3 gap-2">
-                                    {(['ADD_FAAN', 'MULTIPLIER', 'ADD_UNITS'] as const).map((mode) => (
-                                      <button
-                                        key={mode}
-                                        onClick={() => {
-                                          setEditingRules(prev => ({
-                                            ...prev,
-                                            horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, payoutMode: mode }
-                                          }));
-                                          setHasUnsavedSettings(true);
-                                        }}
-                                        className={`py-2 px-2 text-xs rounded-lg border font-medium transition-colors ${
-                                          editingRules.horse?.payoutMode === mode
-                                            ? 'bg-amber-500 text-white border-amber-500'
-                                            : 'bg-white text-slate-600 border-slate-200 hover:bg-amber-50'
-                                        }`}
-                                      >
-                                        {t(mode === 'ADD_FAAN' ? 'addFaan' : mode === 'MULTIPLIER' ? 'multiplier' : 'addUnits')}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* Liability */}
-                                <div>
-                                  <label className="font-bold text-slate-700 block text-sm mb-2">{t('horseLiability')}</label>
-                                  <div className="grid grid-cols-3 gap-2">
-                                    {(['ALL_PAY', 'DISCARDER_PAYS', 'SPLIT_PAY'] as const).map((liability) => (
-                                      <button
-                                        key={liability}
-                                        onClick={() => {
-                                          setEditingRules(prev => ({
-                                            ...prev,
-                                            horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, liability }
-                                          }));
-                                          setHasUnsavedSettings(true);
-                                        }}
-                                        className={`py-2 px-2 text-xs rounded-lg border font-medium transition-colors ${
-                                          editingRules.horse?.liability === liability
-                                            ? 'bg-amber-500 text-white border-amber-500'
-                                            : 'bg-white text-slate-600 border-slate-200 hover:bg-amber-50'
-                                        }`}
-                                      >
-                                        {t(liability === 'ALL_PAY' ? 'allPay' : liability === 'DISCARDER_PAYS' ? 'discarderPays' : 'splitPay')}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* Cap Applies */}
-                                <div className="flex items-center justify-between">
-                                  <span className="font-bold text-slate-700 text-sm">{t('horseCapApplies')}</span>
-                                  <button
-                                    onClick={() => {
-                                      setEditingRules(prev => ({
-                                        ...prev,
-                                        horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, capApplies: !prev.horse?.capApplies }
-                                      }));
-                                      setHasUnsavedSettings(true);
-                                    }}
-                                    className={`w-14 h-8 rounded-full transition-colors ${editingRules.horse?.capApplies ? 'bg-amber-500' : 'bg-slate-200'}`}
-                                  >
-                                    <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform ${editingRules.horse?.capApplies ? 'translate-x-7' : 'translate-x-1'}`} />
-                                  </button>
-                                </div>
-                              </>
-                            )}
+                      {editingRules.horse?.enabled && (
+                        <div className="space-y-6 pt-4 border-t border-amber-200/50">
+                          {/* Horse Count */}
+                          <div>
+                            <label className="font-bold text-slate-700 block text-sm mb-2">{t('horseCount')}</label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="13"
+                              value={editingRules.horse?.horseCount || 4}
+                              onChange={(e) => {
+                                setEditingRules(prev => ({
+                                  ...prev,
+                                  horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, horseCount: parseInt(e.target.value) || 4 }
+                                }));
+                                setHasUnsavedSettings(true);
+                              }}
+                              className="w-full bg-white text-slate-900 border border-amber-300 rounded-xl p-3 text-center font-bold text-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-100 outline-none"
+                            />
                           </div>
-                        )}
+
+                          {/* Per Horse Value */}
+                          <div>
+                            <label className="font-bold text-slate-700 block text-sm mb-2">{t('perHorseValue')} ({lang === 'zh-HK' ? '底' : 'unit'})</label>
+                            <input
+                              type="number"
+                              min="0.5"
+                              step="0.5"
+                              value={editingRules.horse?.perHorseValue || 1}
+                              onChange={(e) => {
+                                setEditingRules(prev => ({
+                                  ...prev,
+                                  horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, perHorseValue: parseFloat(e.target.value) || 1 }
+                                }));
+                                setHasUnsavedSettings(true);
+                              }}
+                              className="w-full bg-white text-slate-900 border border-amber-300 rounded-xl p-3 text-center font-bold text-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-100 outline-none"
+                            />
+                          </div>
+
+                          {/* Payout Mode */}
+                          <div>
+                            <label className="font-bold text-slate-700 block text-sm mb-2">{t('horsePayoutMode')}</label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {(['ADD_FAAN', 'MULTIPLIER', 'ADD_UNITS'] as const).map((mode) => (
+                                <button
+                                  key={mode}
+                                  onClick={() => {
+                                    setEditingRules(prev => ({
+                                      ...prev,
+                                      horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, payoutMode: mode }
+                                    }));
+                                    setHasUnsavedSettings(true);
+                                  }}
+                                  className={`py-2 px-2 text-xs rounded-lg border font-medium transition-colors ${
+                                    editingRules.horse?.payoutMode === mode
+                                      ? 'bg-amber-500 text-white border-amber-500'
+                                      : 'bg-white text-slate-600 border-amber-300 hover:bg-amber-50'
+                                  }`}
+                                >
+                                  {t(mode === 'ADD_FAAN' ? 'addFaan' : mode === 'MULTIPLIER' ? 'multiplier' : 'addUnits')}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Liability */}
+                          <div>
+                            <label className="font-bold text-slate-700 block text-sm mb-2">{t('horseLiability')}</label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {(['ALL_PAY', 'DISCARDER_PAYS', 'SPLIT_PAY'] as const).map((liability) => (
+                                <button
+                                  key={liability}
+                                  onClick={() => {
+                                    setEditingRules(prev => ({
+                                      ...prev,
+                                      horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, liability }
+                                    }));
+                                    setHasUnsavedSettings(true);
+                                  }}
+                                  className={`py-2 px-2 text-xs rounded-lg border font-medium transition-colors ${
+                                    editingRules.horse?.liability === liability
+                                      ? 'bg-amber-500 text-white border-amber-500'
+                                      : 'bg-white text-slate-600 border-amber-300 hover:bg-amber-50'
+                                  }`}
+                                >
+                                  {t(liability === 'ALL_PAY' ? 'allPay' : liability === 'DISCARDER_PAYS' ? 'discarderPays' : 'splitPay')}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Cap Applies */}
+                          <div className="flex items-center justify-between pt-2">
+                            <span className="font-bold text-slate-700 text-sm">{t('horseCapApplies')}</span>
+                            <button
+                              onClick={() => {
+                                setEditingRules(prev => ({
+                                  ...prev,
+                                  horse: { ...DEFAULT_HORSE_CONFIG, ...prev.horse, capApplies: !prev.horse?.capApplies }
+                                }));
+                                setHasUnsavedSettings(true);
+                              }}
+                              className={`w-14 h-8 rounded-full transition-colors ${editingRules.horse?.capApplies ? 'bg-amber-500' : 'bg-slate-200'}`}
+                            >
+                              <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform ${editingRules.horse?.capApplies ? 'translate-x-7' : 'translate-x-1'}`} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Price Configuration */}
