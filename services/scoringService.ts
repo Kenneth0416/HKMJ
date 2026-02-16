@@ -174,8 +174,8 @@ export const calculateRoundDeltas = (
               playerPays -= finalHorseBonus / 3;
               break;
             case 'DISCARDER_PAYS':
-              // 自摸時等同分攤
-              playerPays -= finalHorseBonus / 3;
+              // 自摸時沒有出銃者，視同 ALL_PAY（三家各付全額馬獎）
+              playerPays -= finalHorseBonus;
               break;
           }
         }

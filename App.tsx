@@ -804,79 +804,6 @@ export default function App() {
                         />
                     </div>
 
-                    {/* Price Configuration */}
-                    <div className="space-y-6 mb-8">
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">{t('parameters')}</h3>
-
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div>
-                                    <label className="font-bold text-slate-700 block mb-1">{t('unitPrice')}</label>
-                                    <p className="text-xs text-slate-400 mb-2">{t('baseValue')}</p>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                                        <input 
-                                            type="number"
-                                            min="0.1"
-                                            step="0.1"
-                                            value={editingRules.unitPrice}
-                                            onChange={(e) => updateRuleValue('unitPrice', parseFloat(e.target.value) || 0)}
-                                            className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl px-4 pl-8 py-3 font-mono font-bold text-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div className="flex gap-4">
-                                    <div className="flex-1">
-                                        <span className="font-bold text-slate-700 block text-sm mb-2">{t('minFaan')}</span>
-                                        <input 
-                                            type="number" 
-                                            value={editingRules.minFaan}
-                                            onChange={(e) => updateRuleValue('minFaan', Math.max(0, parseInt(e.target.value) || 0))}
-                                            className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl p-3 text-center font-bold text-lg focus:border-indigo-500 outline-none"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <span className="font-bold text-slate-700 block text-sm mb-2">{t('maxFaan')}</span>
-                                        <input 
-                                            type="number" 
-                                            value={editingRules.maxFaan}
-                                            onChange={(e) => updateRuleValue('maxFaan', parseInt(e.target.value) || 0)}
-                                            className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl p-3 text-center font-bold text-lg focus:border-indigo-500 outline-none"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Dynamic Preview Table */}
-                        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden mt-4 shadow-sm">
-                            <div className="grid grid-cols-3 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 py-3 px-6 uppercase tracking-wider">
-                            <div>{t('faan')}</div>
-                            <div className="col-span-2 text-right">{t('chips')}</div>
-                            </div>
-                            <div className="max-h-60 overflow-y-auto custom-scrollbar">
-                                {[...Array(11)].map((_, i) => (
-                                <div key={i} className={`flex justify-between items-center px-6 py-3 border-b border-slate-50 last:border-0 ${i < editingRules.minFaan || i > editingRules.maxFaan ? 'opacity-30 bg-slate-50' : 'bg-white'}`}>
-                                    <span className="font-mono text-sm text-slate-600 font-medium">
-                                        {i} {t('faanSuffix')} 
-                                        {i === editingRules.maxFaan && <span className="text-[10px] ml-1 text-red-500 bg-red-50 px-1 rounded border border-red-100">{t('cap')}</span>}
-                                        {i === editingRules.minFaan && <span className="text-[10px] ml-1 text-green-500 bg-green-50 px-1 rounded border border-green-100">{t('min')}</span>}
-                                    </span>
-                                    <span className="font-mono font-bold text-slate-800">
-                                        {calculateBaseValue(Math.min(Math.max(i, editingRules.minFaan), editingRules.maxFaan), editingRules.unitPrice)}
-                                    </span>
-                                </div>
-                                ))}
-                                {editingRules.maxFaan >= 10 && (
-                                     <div className="text-center py-2 text-xs text-slate-400 bg-slate-50">
-                                         ...
-                                     </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
                     {/* Horse (跑馬仔) Settings */}
                     <div className="mb-8">
                         <button
@@ -1032,6 +959,80 @@ export default function App() {
                         )}
                     </div>
 
+                    {/* Price Configuration */}
+                    <div className="space-y-6 mb-8">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">{t('parameters')}</h3>
+
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <label className="font-bold text-slate-700 block mb-1">{t('unitPrice')}</label>
+                                    <p className="text-xs text-slate-400 mb-2">{t('baseValue')}</p>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                                        <input 
+                                            type="number"
+                                            min="0.1"
+                                            step="0.1"
+                                            value={editingRules.unitPrice}
+                                            onChange={(e) => updateRuleValue('unitPrice', parseFloat(e.target.value) || 0)}
+                                            className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl px-4 pl-8 py-3 font-mono font-bold text-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-4">
+                                    <div className="flex-1">
+                                        <span className="font-bold text-slate-700 block text-sm mb-2">{t('minFaan')}</span>
+                                        <input 
+                                            type="number" 
+                                            value={editingRules.minFaan}
+                                            onChange={(e) => updateRuleValue('minFaan', Math.max(0, parseInt(e.target.value) || 0))}
+                                            className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl p-3 text-center font-bold text-lg focus:border-indigo-500 outline-none"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <span className="font-bold text-slate-700 block text-sm mb-2">{t('maxFaan')}</span>
+                                        <input 
+                                            type="number" 
+                                            value={editingRules.maxFaan}
+                                            onChange={(e) => updateRuleValue('maxFaan', parseInt(e.target.value) || 0)}
+                                            className="w-full bg-slate-50 text-slate-900 border border-slate-300 rounded-xl p-3 text-center font-bold text-lg focus:border-indigo-500 outline-none"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Dynamic Preview Table */}
+                        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden mt-4 shadow-sm">
+                            <div className="grid grid-cols-3 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 py-3 px-6 uppercase tracking-wider">
+                            <div>{t('faan')}</div>
+                            <div className="col-span-2 text-right">{t('chips')}</div>
+                            </div>
+                            <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                                {[...Array(11)].map((_, i) => (
+                                <div key={i} className={`flex justify-between items-center px-6 py-3 border-b border-slate-50 last:border-0 ${i < editingRules.minFaan || i > editingRules.maxFaan ? 'opacity-30 bg-slate-50' : 'bg-white'}`}>
+                                    <span className="font-mono text-sm text-slate-600 font-medium">
+                                        {i} {t('faanSuffix')} 
+                                        {i === editingRules.maxFaan && <span className="text-[10px] ml-1 text-red-500 bg-red-50 px-1 rounded border border-red-100">{t('cap')}</span>}
+                                        {i === editingRules.minFaan && <span className="text-[10px] ml-1 text-green-500 bg-green-50 px-1 rounded border border-green-100">{t('min')}</span>}
+                                    </span>
+                                    <span className="font-mono font-bold text-slate-800">
+                                        {calculateBaseValue(Math.min(Math.max(i, editingRules.minFaan), editingRules.maxFaan), editingRules.unitPrice)}
+                                    </span>
+                                </div>
+                                ))}
+                                {editingRules.maxFaan >= 10 && (
+                                     <div className="text-center py-2 text-xs text-slate-400 bg-slate-50">
+                                         ...
+                                     </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                     {/* Save Button - Fixed at bottom of settings */}
                     <div className={`fixed bottom-20 md:bottom-0 left-0 md:left-20 lg:left-64 right-0 xl:right-96 p-3 md:p-4 bg-white/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-between transition-all duration-300 z-[25] ${hasUnsavedSettings ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}`}>
                         <div className="flex items-center gap-2 text-amber-600">
@@ -1046,7 +1047,6 @@ export default function App() {
                         </button>
                     </div>
                 </div>
-            </div>
             )}
 
         </main>
