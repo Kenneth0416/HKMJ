@@ -893,7 +893,7 @@ export default function App() {
                           <div>
                             <label className="font-bold text-slate-700 block text-sm mb-2">{t('horsePayoutMode')}</label>
                             <div className="grid grid-cols-3 gap-2">
-                              {(['ADD_FAAN', 'MULTIPLIER', 'ADD_UNITS'] as const).map((mode) => (
+                              {(['ADD_UNITS', 'ADD_FAAN', 'MULTIPLIER'] as const).map((mode) => (
                                 <button
                                   key={mode}
                                   onClick={() => {
@@ -909,7 +909,7 @@ export default function App() {
                                       : 'bg-white text-slate-600 border-amber-300 hover:bg-amber-50'
                                   }`}
                                 >
-                                  {t(mode === 'ADD_FAAN' ? 'addFaan' : mode === 'MULTIPLIER' ? 'multiplier' : 'addUnits')}
+                                  {t(mode === 'ADD_UNITS' ? 'addUnits' : mode === 'ADD_FAAN' ? 'addFaan' : 'multiplier')}
                                 </button>
                               ))}
                             </div>

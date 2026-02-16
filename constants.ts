@@ -17,9 +17,9 @@ export const ROUND_WIND_NAMES: Record<RoundWind, Record<string, string>> = {
 export const DEFAULT_HORSE_CONFIG: HorseConfig = {
   enabled: false,
   horseCount: 4,
-  payoutMode: 'ADD_FAAN',
+  payoutMode: 'ADD_UNITS',
   perHorseValue: 1,
-  liability: 'DISCARDER_PAYS',
+  liability: 'ALL_PAY',
   capApplies: true
 };
 
