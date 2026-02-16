@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 type ColorScheme = 'slate' | 'amber' | 'indigo';
 
@@ -52,36 +52,89 @@ const StepperInput: React.FC<StepperInputProps> = ({
   inputClassName = '',
 }) => {
   const colors = colorConfigs[colorScheme];
+
+  // Internal state for handling typing - allows empty string during input
+  const [inputValue, setInputValue] = useState<string>(String(value ?? ''));
+  const isFocusedRef = useRef(false);
+
+  // Sync external value to internal state when not focused
+  useEffect(() => {
+    if (!isFocusedRef.current) {
+      setInputValue(String(value ?? ''));
+    }
+  }, [value]);
+
   const currentValue = value ?? defaultValue ?? min;
 
   const handleDecrement = () => {
     const newVal = Math.max(min, currentValue - step);
-    onChange(isInteger ? Math.round(newVal) : newVal);
+    const finalVal = isInteger ? Math.round(newVal) : newVal;
+    onChange(finalVal);
   };
 
   const handleIncrement = () => {
     const newVal = Math.min(max, currentValue + step);
-    onChange(isInteger ? Math.round(newVal) : newVal);
+    const finalVal = isInteger ? Math.round(newVal) : newVal;
+    onChange(finalVal);
   };
 
   const parseValue = (val: string): number | null => {
-    if (val === '') return null;
+    if (val === '' || val === '-' || val === '.') return null;
     const parsed = isInteger ? parseInt(val, 10) : parseFloat(val);
     return isNaN(parsed) ? null : parsed;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const parsed = parseValue(e.target.value);
+    const rawVal = e.target.value;
+
+    // Always update internal input value for display
+    setInputValue(rawVal);
+
+    // Allow empty input during typing - don't call onChange
+    if (rawVal === '') {
+      return;
+    }
+
+    // Validate format before parsing
+    const isValidFormat = isInteger
+      ? /^-?\d*$/.test(rawVal)
+      : /^-?\d*\.?\d*$/.test(rawVal);
+
+    if (!isValidFormat) {
+      return;
+    }
+
+    // Only update parent if we have a complete valid number
+    const parsed = parseValue(rawVal);
     if (parsed !== null) {
       const clampedVal = Math.max(min, Math.min(max, parsed));
       onChange(isInteger ? Math.round(clampedVal) : clampedVal);
     }
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const parsed = parseValue(e.target.value);
+  const handleFocus = () => {
+    isFocusedRef.current = true;
+    // Select all text on focus for easy replacement
+    const input = document.activeElement as HTMLInputElement;
+    if (input) {
+      input.select();
+    }
+  };
+
+  const handleBlur = () => {
+    isFocusedRef.current = false;
+
+    // Restore default on blur if empty or invalid
+    const parsed = parseValue(inputValue);
     if (parsed === null || parsed < min) {
-      onChange(defaultValue ?? min);
+      const restoreVal = defaultValue ?? min;
+      onChange(restoreVal);
+      setInputValue(String(restoreVal));
+    } else if (parsed > max) {
+      // Clamp to max if exceeded
+      const clampedVal = isInteger ? Math.round(max) : max;
+      onChange(clampedVal);
+      setInputValue(String(clampedVal));
     }
   };
 
@@ -106,12 +159,12 @@ const StepperInput: React.FC<StepperInputProps> = ({
           </span>
         )}
         <input
-          type="number"
-          min={min}
-          max={max}
-          step={step}
-          value={value ?? ''}
+          type="text"
+          inputMode="numeric"
+          pattern={isInteger ? '[0-9]*' : '[0-9.]*'}
+          value={inputValue}
           onChange={handleChange}
+          onFocus={handleFocus}
           onBlur={handleBlur}
           className={`
             w-full h-12 md:h-11 text-center font-bold text-xl md:text-lg
