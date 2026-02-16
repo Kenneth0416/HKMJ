@@ -1236,14 +1236,14 @@ export default function App() {
                         transform: `translateY(${translateY}px) scale(${isDragging ? 1.03 : 1})`,
                         zIndex: isDragging ? 50 : 1,
                         opacity: isDragging ? 0.95 : 1,
+                        pointerEvents: isDragging ? 'none' : 'auto',
                         boxShadow: isDragging ? '0 12px 40px rgba(99,102,241,0.3)' : undefined,
                         transition: isDragging
                           ? 'box-shadow 0.15s, opacity 0.15s'
-                          : 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s',
+                          : 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s',
                       }}
                       className={`flex items-center gap-3 p-3 rounded-xl border-2 touch-none select-none ${
                         isDragging ? 'border-indigo-500 bg-white' :
-                        isDragTarget ? 'border-indigo-400 bg-indigo-50' :
                         'border-slate-200 bg-white hover:border-indigo-200 active:scale-[0.98]'
                       } ${isDealer ? 'ring-2 ring-indigo-200' : ''}`}
                     >
