@@ -91,7 +91,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({ presets, onSelect, lang
   };
 
   return (
-    <div className="relative">
+    <div className="relative bg-white border border-indigo-200 rounded-xl shadow-sm overflow-hidden transition-all group hover:border-indigo-300">
       {/* Backdrop to close on click outside */}
       {shouldRender && (
         <div
@@ -103,7 +103,7 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({ presets, onSelect, lang
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full bg-white border rounded-xl p-3 flex items-center justify-between transition-all shadow-sm group ${isOpen ? 'border-indigo-500 ring-2 ring-indigo-100' : 'border-indigo-200 hover:border-indigo-300'}`}
+        className={`w-full p-3 flex items-center justify-between transition-all ${isOpen ? 'bg-indigo-50 border-b border-indigo-100' : ''}`}
       >
         <div className="flex items-center gap-3 overflow-hidden">
           <div className={`p-2 rounded-lg shrink-0 transition-colors duration-200 ${isCustom ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>
@@ -133,17 +133,17 @@ const PresetSelector: React.FC<PresetSelectorProps> = ({ presets, onSelect, lang
         />
       </button>
 
-      {/* Dropdown Menu */}
+      {/* Dropdown Menu - Accordion style */}
       {shouldRender && (
         <div
-          className={`absolute top-full left-0 w-full mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-20 max-h-64 overflow-y-auto divide-y divide-slate-50 origin-top ${isOpen ? 'preset-dropdown' : 'opacity-0 scale-95 -translate-y-2 transition-all duration-200'}`}
+          className={`z-20 max-h-64 overflow-y-auto border-t border-indigo-100 ${isOpen ? 'preset-accordion-open' : 'preset-accordion-close'}`}
         >
           {presets.map((preset, index) => (
             <button
               key={index}
               onClick={() => handleSelect(index)}
-              className={`w-full text-left p-3 hover:bg-indigo-50 transition-colors flex items-center justify-between group ${isOpen ? 'preset-item' : ''}`}
-              style={isOpen ? { animationDelay: `${index * 40}ms` } : undefined}
+              className={`w-full text-left p-3 hover:bg-indigo-50 transition-colors flex items-center justify-between group border-b border-slate-100 last:border-b-0 ${isOpen ? 'preset-item-animate' : ''}`}
+              style={isOpen ? { animationDelay: `${index * 30}ms` } : undefined}
             >
               <div className="flex-1">
                 <div className={`text-sm font-bold transition-colors duration-150 ${currentPresetId === index ? 'text-indigo-700' : 'text-slate-700 group-hover:text-indigo-600'}`}>
